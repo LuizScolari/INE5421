@@ -1,0 +1,5 @@
+se: se
+entao: entao
+senao: senao
+id: [a-zA-Z]([a-zA-Z] | [0-9])*
+num: [0-9]+
