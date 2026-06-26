@@ -1,0 +1,3 @@
+pa: a
+pabb: abb
+pab: a*b+

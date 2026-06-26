@@ -1,9 +1,14 @@
 """Algoritmo (a): conversão de Expressão Regular para AFD.
 
-Implementa o método direto descrito no livro do Aho. A expressão regular é
-aumentada com um marcador de fim, transformada em uma árvore sintática e, a
-partir das funções nullable, firstpos, lastpos e followpos, o AFD é construído
-sem passar por um autômato não determinístico intermediário.
+Implementa o método direto da Seção 3.9 do livro do Aho (Algoritmo 3.36). A
+expressão é aumentada com o marcador de fim `#`, transformada em uma árvore
+sintática e, a partir das funções nullable, firstpos, lastpos e followpos
+(Figura 3.58 e Seção 3.9.4), o AFD é construído diretamente (Figura 3.62).
+
+Os operadores estendidos `+` e `?` e os grupos `[...]` são abreviações (Seção
+3.3.5) e são expandidos para os operadores básicos união `|`, concatenação e
+fecho `*` antes de montar a árvore, usando as identidades `r+ = rr*`, `r? = r|&`
+e `[a-c] = a|b|c`. Assim as quatro funções usam exatamente as regras da Fig. 3.58.
 """
 
 from automaton import Automaton
@@ -15,7 +20,7 @@ ENDMARKER = "#"
 
 
 class Node:
-    """Nó da árvore sintática da expressão regular."""
+    """Nó da árvore sintática; após a expansão só há 'symbol', 'epsilon', '|', '.' e '*'."""
 
     def __init__(self, kind, symbol=None, left=None, right=None):
         self.kind = kind
@@ -29,7 +34,7 @@ class Node:
 
 
 def expand_classes(regex):
-    """Substitui grupos como [a-z] por alternações equivalentes (a|b|...)."""
+    """Substitui grupos como [a-z] pela alternação equivalente (a|b|...), conforme a Seção 3.3.5."""
     output = []
     index = 0
     while index < len(regex):
@@ -127,85 +132,122 @@ def to_postfix(tokens):
 def build_tree(postfix):
     """Constrói a árvore sintática a partir da expressão em notação posfixa."""
     stack = []
-    counter = [0]
     for token in postfix:
         if token == EPSILON:
             stack.append(Node("epsilon"))
         elif token not in OPERATORS:
-            counter[0] += 1
-            node = Node("symbol", symbol=token)
-            node.position = counter[0]
-            stack.append(node)
+            stack.append(Node("symbol", symbol=token))
         elif token in ("*", "+", "?"):
-            child = stack.pop()
-            stack.append(Node(token, left=child))
+            stack.append(Node(token, left=stack.pop()))
         else:
             right = stack.pop()
             left = stack.pop()
             stack.append(Node(token, left=left, right=right))
     if len(stack) != 1:
         raise ValueError("Expressão regular mal formada.")
-    return stack.pop(), counter[0]
+    return stack.pop()
 
 
-def annotate(node, followpos, symbol_at):
-    """Calcula nullable, firstpos, lastpos e followpos em pós-ordem."""
-    if node.kind == "epsilon":
-        node.nullable = True
+def copy_subtree(node):
+    """Duplica uma subárvore, usado na expansão de `r+` em `rr*`."""
+    clone = Node(node.kind, symbol=node.symbol)
+    if node.left is not None:
+        clone.left = copy_subtree(node.left)
+    if node.right is not None:
+        clone.right = copy_subtree(node.right)
+    return clone
+
+
+def desugar(node):
+    """Reescreve os operadores `+` e `?` usando apenas união, concatenação e fecho."""
+    if node.kind in ("symbol", "epsilon"):
+        return node
+    if node.kind in ("|", "."):
+        node.left = desugar(node.left)
+        node.right = desugar(node.right)
+        return node
+    if node.kind == "*":
+        node.left = desugar(node.left)
+        return node
+    if node.kind == "?":
+        child = desugar(node.left)
+        return Node("|", left=child, right=Node("epsilon"))
+    if node.kind == "+":
+        child = desugar(node.left)
+        return Node(".", left=child, right=Node("*", left=copy_subtree(child)))
+    raise ValueError(f"Operador desconhecido na árvore: {node.kind}")
+
+
+def assign_positions(node, counter, symbol_at):
+    """Numera as folhas de símbolo (incluindo `#`) da esquerda para a direita."""
+    if node is None or node.kind == "epsilon":
         return
     if node.kind == "symbol":
+        counter[0] += 1
+        node.position = counter[0]
+        symbol_at[counter[0]] = node.symbol
+        return
+    assign_positions(node.left, counter, symbol_at)
+    assign_positions(node.right, counter, symbol_at)
+
+
+def annotate(node, followpos):
+    """Calcula nullable, firstpos, lastpos e followpos pelas regras da Figura 3.58."""
+    if node.kind == "epsilon":
+        node.nullable = True
+        node.firstpos = set()
+        node.lastpos = set()
+    elif node.kind == "symbol":
         node.nullable = False
         node.firstpos = {node.position}
         node.lastpos = {node.position}
-        symbol_at[node.position] = node.symbol
-        followpos.setdefault(node.position, set())
-        return
-
-    if node.kind == "|":
-        annotate(node.left, followpos, symbol_at)
-        annotate(node.right, followpos, symbol_at)
+    elif node.kind == "|":
+        annotate(node.left, followpos)
+        annotate(node.right, followpos)
         node.nullable = node.left.nullable or node.right.nullable
         node.firstpos = node.left.firstpos | node.right.firstpos
         node.lastpos = node.left.lastpos | node.right.lastpos
     elif node.kind == ".":
-        annotate(node.left, followpos, symbol_at)
-        annotate(node.right, followpos, symbol_at)
+        annotate(node.left, followpos)
+        annotate(node.right, followpos)
         node.nullable = node.left.nullable and node.right.nullable
-        node.firstpos = node.left.firstpos | (node.right.firstpos if node.left.nullable else set())
-        node.lastpos = node.right.lastpos | (node.left.lastpos if node.right.nullable else set())
+        if node.left.nullable:
+            node.firstpos = node.left.firstpos | node.right.firstpos
+        else:
+            node.firstpos = set(node.left.firstpos)
+        if node.right.nullable:
+            node.lastpos = node.right.lastpos | node.left.lastpos
+        else:
+            node.lastpos = set(node.right.lastpos)
         for position in node.left.lastpos:
             followpos[position] |= node.right.firstpos
-    elif node.kind in ("*", "+"):
-        annotate(node.left, followpos, symbol_at)
-        node.nullable = True if node.kind == "*" else node.left.nullable
+    elif node.kind == "*":
+        annotate(node.left, followpos)
+        node.nullable = True
         node.firstpos = set(node.left.firstpos)
         node.lastpos = set(node.left.lastpos)
         for position in node.left.lastpos:
             followpos[position] |= node.left.firstpos
-    elif node.kind == "?":
-        annotate(node.left, followpos, symbol_at)
-        node.nullable = True
-        node.firstpos = set(node.left.firstpos)
-        node.lastpos = set(node.left.lastpos)
 
 
 def regex_to_dfa(regex, token=None):
     """Converte uma expressão regular em um AFD rotulado pelo token informado."""
     expanded = expand_classes(regex)
-    tokens = add_concatenation(to_tokens(expanded))
-    postfix = to_postfix(tokens)
-    tree, last_position = build_tree(postfix)
+    postfix = to_postfix(add_concatenation(to_tokens(expanded)))
+    tree = desugar(build_tree(postfix))
 
-    end_position = last_position + 1
     end_leaf = Node("symbol", symbol=ENDMARKER)
-    end_leaf.position = end_position
     root = Node(".", left=tree, right=end_leaf)
 
-    followpos = {}
     symbol_at = {}
-    annotate(root, followpos, symbol_at)
+    counter = [0]
+    assign_positions(root, counter, symbol_at)
+    end_position = end_leaf.position
 
-    alphabet = {sym for pos, sym in symbol_at.items() if pos != end_position}
+    followpos = {position: set() for position in symbol_at}
+    annotate(root, followpos)
+
+    alphabet = {symbol_at[position] for position in symbol_at if position != end_position}
     start = frozenset(root.firstpos)
     states = {start}
     pending = [start]

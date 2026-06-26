@@ -1,10 +1,14 @@
-"""Algoritmo (b): minimização de Autômatos Finitos Determinísticos.
+"""Algoritmo (b): minimização de AFD (Algoritmo 3.39 do livro do Aho).
 
-A minimização remove estados inalcançáveis e estados mortos (de onde nenhum
-estado final é atingível) e em seguida aplica refinamento de partições. Dois
-estados ficam no mesmo bloco enquanto não houver um símbolo que os leve a
-blocos diferentes. Estados finais com tokens distintos começam separados para
-preservar a informação de qual padrão cada estado reconhece.
+Completa o autômato com um estado morto que recebe as transições ausentes,
+parte da partição inicial {finais, não-finais} e a refina pelo procedimento da
+Figura 3.64: dois estados permanecem no mesmo grupo enquanto, para todo símbolo,
+levarem a estados de um mesmo grupo. Ao final, constrói o AFD mínimo escolhendo
+um representante por grupo (passo 4) e elimina o estado morto, conforme a seção
+"Eliminating the Dead State".
+
+Para o caso do analisador léxico (Seção 3.9.7), os estados finais são separados
+na partição inicial por token, de modo que cada grupo reconhece um único padrão.
 """
 
 from automaton import Automaton
@@ -12,89 +16,62 @@ from automaton import Automaton
 DEAD = object()
 
 
-def remove_unreachable(dfa):
-    """Devolve o conjunto de estados alcançáveis a partir do estado inicial."""
-    reachable = set()
-    queue = [dfa.initial]
-    while queue:
-        state = queue.pop(0)
-        if state in reachable:
-            continue
-        reachable.add(state)
-        for targets in dfa.transitions.get(state, {}).values():
-            for target in targets:
-                if target not in reachable:
-                    queue.append(target)
-    return reachable
-
-
-def find_live(dfa, allowed):
-    """Devolve os estados que conseguem alcançar algum estado final."""
-    predecessors = {state: set() for state in allowed}
-    for state in allowed:
-        for targets in dfa.transitions.get(state, {}).values():
-            for target in targets:
-                if target in allowed:
-                    predecessors[target].add(state)
-    live = set()
-    queue = [state for state in allowed if state in dfa.accepting]
-    while queue:
-        state = queue.pop(0)
-        if state in live:
-            continue
-        live.add(state)
-        for predecessor in predecessors[state]:
-            if predecessor not in live:
-                queue.append(predecessor)
-    return live
+def _delta(dfa, state, symbol):
+    """Função de transição completa: devolve o estado morto quando não há transição."""
+    if state is DEAD:
+        return DEAD
+    target = dfa.step(state, symbol)
+    return target if target is not None else DEAD
 
 
 def minimize(dfa):
     """Minimiza um AFD preservando os rótulos de token dos estados finais."""
-    reachable = remove_unreachable(dfa)
-    live = find_live(dfa, reachable)
-    kept = {state for state in reachable if state in live or state == dfa.initial}
-
-    block_of = {}
-    for state in kept:
-        if state in dfa.accepting:
-            block_of[state] = ("final", dfa.token_of.get(state))
-        else:
-            block_of[state] = ("comum",)
-
     symbols = sorted(dfa.alphabet)
+    states = list(dfa.states) + [DEAD]
+
+    group_of = {}
+    for state in states:
+        if state is not DEAD and state in dfa.accepting:
+            group_of[state] = ("final", dfa.token_of.get(state))
+        else:
+            group_of[state] = ("comum",)
+
     while True:
-        signatures = {}
-        for state in kept:
-            targets = []
-            for symbol in symbols:
-                destination = dfa.step(state, symbol)
-                targets.append(block_of[destination] if destination in block_of else DEAD)
-            signatures[state] = (block_of[state], tuple(targets))
-        groups = {}
-        for state in kept:
-            groups.setdefault(signatures[state], set()).add(state)
-        new_block_of = {}
-        for index, (signature, members) in enumerate(groups.items()):
+        buckets = {}
+        for state in states:
+            signature = (group_of[state], tuple(group_of[_delta(dfa, state, a)] for a in symbols))
+            buckets.setdefault(signature, []).append(state)
+        new_group_of = {}
+        for index, members in enumerate(buckets.values()):
             for state in members:
-                new_block_of[state] = index
-        if len(set(new_block_of.values())) == len(set(block_of.values())):
-            block_of = new_block_of
+                new_group_of[state] = index
+        if len(set(new_group_of.values())) == len(set(group_of.values())):
+            group_of = new_group_of
             break
-        block_of = new_block_of
+        group_of = new_group_of
+
+    representative = {}
+    for state in states:
+        representative.setdefault(group_of[state], state)
+
+    dead_group = group_of[DEAD]
+    start_group = group_of[dfa.initial]
 
     minimized = Automaton()
-    initial_block = block_of[dfa.initial]
-    minimized.set_initial(initial_block)
-    for state in kept:
-        block = block_of[state]
-        if state in dfa.accepting:
-            minimized.add_state(block, accepting=True, token=dfa.token_of.get(state))
+    minimized.set_initial(start_group)
+    for group, rep in representative.items():
+        if group == dead_group and group != start_group:
+            continue
+        if rep is not DEAD and rep in dfa.accepting:
+            minimized.add_state(group, accepting=True, token=dfa.token_of.get(rep))
         else:
-            minimized.add_state(block)
-    for state in kept:
+            minimized.add_state(group)
+    for group, rep in representative.items():
+        if group == dead_group and group != start_group:
+            continue
         for symbol in symbols:
-            destination = dfa.step(state, symbol)
-            if destination in block_of:
-                minimized.add_transition(block_of[state], symbol, block_of[destination])
+            target_group = group_of[_delta(dfa, rep, symbol)]
+            if target_group == dead_group and target_group != start_group:
+                continue
+            minimized.add_transition(group, symbol, target_group)
     return minimized.rename("q")

@@ -1,0 +1,9 @@
+<begin, begin>
+<x, id>
+<=, =>
+<10, num>
+<;, ;>
+<y, id>
+<=, =>
+<z, id>
+<end, end>

@@ -62,6 +62,18 @@ CASES = [
         "abc 123 a1b2 $%",
         "<abc, id>\n<123, num>\n<a1b2, id>\n<$%, erro!>",
     ),
+    (
+        "Livro Secao 3.8 (Exemplo 3.28): padrao listado primeiro tem prioridade",
+        "livro_secao3_8.txt",
+        "abb",
+        "<abb, pabb>",
+    ),
+    (
+        "Livro Secao 3.8 (Exemplo 3.29): entrada abba reconhece abb e depois a",
+        "livro_secao3_8.txt",
+        "abba",
+        "<abb, pabb>\n<a, pa>",
+    ),
 ]
 
 

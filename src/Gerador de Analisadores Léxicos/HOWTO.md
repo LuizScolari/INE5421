@@ -9,14 +9,34 @@ externa (apenas `sys` e `os` da biblioteca padrão, para entrada/saída).
 
 ## Algoritmos implementados
 
-Cada algoritmo fica em um arquivo separado:
+Cada algoritmo fica em um arquivo separado e segue exatamente o livro
+*Compilers: Principles, Techniques, and Tools* (Aho, Lam, Sethi, Ullman, 2ª ed.):
 
-| Arquivo | Algoritmo |
-| --- | --- |
-| [regex_to_dfa.py](regex_to_dfa.py) | (a) Conversão de Expressão Regular para AFD (método direto do Aho: árvore sintática, `nullable`, `firstpos`, `lastpos`, `followpos`) |
-| [minimization.py](minimization.py) | (b) Minimização de AFD (remoção de inalcançáveis/mortos e refinamento de partições) |
-| [union.py](union.py) | (c) União de autômatos via epsilon-transição |
-| [determinization.py](determinization.py) | (d) Determinização (construção de subconjuntos com fecho-epsilon) |
+| Arquivo | Algoritmo | Referência no livro |
+| --- | --- | --- |
+| [regex_to_dfa.py](regex_to_dfa.py) | (a) ER → AFD (método direto: árvore sintática, `nullable`/`firstpos`/`lastpos`/`followpos`) | **Algoritmo 3.36** e Fig. 3.62; funções da **Fig. 3.58** e Seção 3.9.4 |
+| [minimization.py](minimization.py) | (b) Minimização de AFD (refinamento de partições) | **Algoritmo 3.39** e Fig. 3.64; "Eliminating the Dead State" |
+| [union.py](union.py) | (c) União de autômatos via epsilon-transição | Seção 3.8.3 e Fig. 3.50/3.52 |
+| [determinization.py](determinization.py) | (d) Determinização (construção de subconjuntos com fecho-epsilon) | **Algoritmo 3.20** e Fig. 3.32/3.33 |
+
+### Aderência ao livro
+
+- **(a)** As regras de `nullable`/`firstpos`/`lastpos` da Fig. 3.58 cobrem apenas
+  `&` (epsilon), folhas, `|`, concatenação e `*`. Os operadores `+`, `?` e os
+  grupos `[...]` são *abreviações* (Seção 3.3.5) e são expandidos para os
+  operadores básicos antes de montar a árvore, pelas identidades `r+ = rr*`,
+  `r? = r|&` e `[a-c] = a|b|c`. Assim as quatro funções usam as regras da Fig.
+  3.58 sem alteração.
+- **(b)** O AFD é completado com um estado morto que recebe as transições
+  ausentes, a partição inicial é `{finais, não-finais}` (separando finais por
+  token, como na Seção 3.9.7), o refinamento segue a Fig. 3.64 e, ao final, o
+  estado morto é eliminado.
+- **(d)** A regra de desempate ao rotular um estado do AFD — "vence o padrão
+  listado primeiro" — é a da Seção 3.8.3 (Exemplo 3.28).
+
+Os exemplos do próprio livro são usados como teste de regressão (ver
+[tests/run_tests.py](tests/run_tests.py)): o AFD direto de `(a|b)*abb` reproduz a
+Fig. 3.63 e o analisador para `a`, `abb`, `a*b+` reproduz os Exemplos 3.28 e 3.29.
 
 Arquivos de apoio:
 
