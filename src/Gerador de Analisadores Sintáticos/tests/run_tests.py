@@ -82,11 +82,77 @@ def test_reserved_words():
     check("Comandos: programa aceito", parse(analyzer.table, terminals).accepted)
 
 
+def test_extended_arithmetic():
+    """Aritmética com + - * / e parênteses: confere estados e análise (token-file)."""
+    grammar = load_grammar(grammar_path("aritmetica_estendida.txt"))
+    table = build_slr_table(grammar)
+    check("Aritmetica: 17 estados", len(table.states) == 17)
+    check("Aritmetica: sem conflitos (SLR(1))", table.is_slr())
+    check("Aritmetica: id + num * ( id - num ) aceito",
+          parse(table, "id + num * ( id - num )".split()).accepted)
+    check("Aritmetica: id / ( id ) - num aceito",
+          parse(table, "id / ( id ) - num".split()).accepted)
+    rejected = parse(table, "id + + id".split())
+    check("Aritmetica: id + + id rejeitado na posicao 2",
+          (not rejected.accepted) and rejected.error_position == 2)
+
+    analyzer = SyntacticAnalyzer(read("gramaticas", "aritmetica_estendida.txt"))
+    analyzer.build()
+    tokens = parse_token_list(read("tokens", "aritmetica_ok.txt"))
+    terminals, _ = tokens_to_terminals(tokens, analyzer.symbol_table, set(analyzer.grammar.terminals))
+    check("Aritmetica: terminais do token-file corretos",
+          terminals == ["id", "+", "num", "*", "(", "id", "-", "num", ")"])
+    check("Aritmetica: token-file aceito", parse(analyzer.table, terminals).accepted)
+
+
+def test_calls_epsilon():
+    """Chamadas com lista de argumentos e produção épsilon (ARGS -> &)."""
+    grammar = load_grammar(grammar_path("chamadas.txt"))
+    table = build_slr_table(grammar)
+    check("Chamadas: sem conflitos (SLR(1))", table.is_slr())
+    check("Chamadas: FIRST(ARGS) contem & e id e num",
+          {"&", "id", "num"} <= table.first["ARGS"])
+    check("Chamadas: lista vazia id ( ) aceita", parse(table, "id ( )".split()).accepted)
+    check("Chamadas: id ( id , num , id ) aceito",
+          parse(table, "id ( id , num , id )".split()).accepted)
+    check("Chamadas: id ( , id ) rejeitado", not parse(table, "id ( , id )".split()).accepted)
+    check("Chamadas: id ( id id ) rejeitado", not parse(table, "id ( id id )".split()).accepted)
+
+
+def test_blocks():
+    """Blocos aninhados com if-then, atribuições e expressões (token-file)."""
+    analyzer = SyntacticAnalyzer(read("gramaticas", "blocos.txt"), ["if", "then"])
+    analyzer.build()
+    check("Blocos: 24 estados", len(analyzer.table.states) == 24)
+    check("Blocos: sem conflitos (SLR(1))", analyzer.table.is_slr())
+    check("Blocos: { { id = num } ; id = id } aceito",
+          parse(analyzer.table, "{ { id = num } ; id = id }".split()).accepted)
+
+    tokens = parse_token_list(read("tokens", "blocos_ok.txt"))
+    terminals, resolved = tokens_to_terminals(tokens, analyzer.symbol_table, set(analyzer.grammar.terminals))
+    check("Blocos: 'if' resolvido como <if, PR>", resolved[1] == ("if", "PR"))
+    check("Blocos: 'then' resolvido como <then, PR>", resolved[3] == ("then", "PR"))
+    check("Blocos: 'x' inserido como id na tabela", ("x", "id") in analyzer.symbol_table.entries)
+    check("Blocos: programa com if-then aceito", parse(analyzer.table, terminals).accepted)
+
+
+def test_non_slr():
+    """Gramática ambígua (dangling-else): deve acusar conflito (não é SLR(1))."""
+    grammar = load_grammar(grammar_path("dangling_else.txt"))
+    table = build_slr_table(grammar)
+    check("Dangling-else: nao e SLR(1)", not table.is_slr())
+    check("Dangling-else: conflito reportado", len(table.conflicts) >= 1)
+
+
 def main():
     """Roda todos os testes e informa o total de verificações aprovadas."""
     test_expression_grammar()
     test_epsilon_grammar()
     test_reserved_words()
+    test_extended_arithmetic()
+    test_calls_epsilon()
+    test_blocks()
+    test_non_slr()
     passed = 0
     for description, ok in RESULTS:
         passed += int(ok)

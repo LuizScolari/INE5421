@@ -1,0 +1,4 @@
+C ::= id ( ARGS )
+ARGS ::= LISTA | &
+LISTA ::= LISTA , E | E
+E ::= id | num

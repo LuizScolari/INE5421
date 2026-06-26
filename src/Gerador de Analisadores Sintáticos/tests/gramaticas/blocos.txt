@@ -1,0 +1,5 @@
+P ::= { L }
+L ::= L ; C | C
+C ::= id = E | P | if E then C
+E ::= E + T | T
+T ::= id | num | ( E )

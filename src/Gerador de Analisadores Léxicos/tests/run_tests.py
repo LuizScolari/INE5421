@@ -74,6 +74,27 @@ CASES = [
         "abba",
         "<abb, pabb>\n<a, pa>",
     ),
+    (
+        "Mini-linguagem: palavras-chave, relop e delim (programa com espacos)",
+        "exemplo5_minilinguagem.txt",
+        "if x1 <= 20 { y = x1 } while z <> 0 do return",
+        "<if, keyword>\n<x1, id>\n<<=, relop>\n<20, num>\n<{, delim>\n<y, id>\n"
+        "<=, relop>\n<x1, id>\n<}, delim>\n<while, keyword>\n<z, id>\n<<>, relop>\n"
+        "<0, num>\n<do, keyword>\n<return, keyword>",
+    ),
+    (
+        "Mini-linguagem: maior prefixo sem espacos (x1<=20;y<>3)",
+        "exemplo5_minilinguagem.txt",
+        "x1<=20;y<>3",
+        "<x1, id>\n<<=, relop>\n<20, num>\n<;, delim>\n<y, id>\n<<>, relop>\n<3, num>",
+    ),
+    (
+        "Mini-linguagem: prioridade palavra-chave x identificador",
+        "exemplo5_minilinguagem.txt",
+        "if iffy ifx do done return returns",
+        "<if, keyword>\n<iffy, id>\n<ifx, id>\n<do, keyword>\n<done, id>\n"
+        "<return, keyword>\n<returns, id>",
+    ),
 ]
 
 
