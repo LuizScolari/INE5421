@@ -29,7 +29,7 @@ Arquivos de apoio:
 | [grammar.py](grammar.py) | Estrutura da GLC, leitura do formato `::=` e gramática aumentada `S' -> S` |
 | [symbol_table.py](symbol_table.py) | Tabela de símbolos com palavras reservadas e leitura da lista de tokens |
 | [syntactic_analyzer.py](syntactic_analyzer.py) | Interface de projeto: encadeia os algoritmos e fornece as visualizações |
-| [main.py](main.py) | Interface de linha de comando (menu interativo e modo em lote) |
+| [main.py](main.py) | Interface de linha de comando (argparse): roda toda a cadeia e exibe as etapas |
 
 ## Fluxo de construção
 
@@ -77,26 +77,67 @@ Entre na pasta do projeto antes de rodar (os módulos se importam entre si):
 cd "src/Gerador de Analisadores Sintáticos"
 ```
 
-### Menu interativo
-
 ```
-python3 main.py
+python3 main.py <gramatica> [tokens] [-r reservadas] [-o saida]
 ```
 
-Permite carregar a gramática e as palavras reservadas, visualizar a coleção
-canônica de itens, os conjuntos FIRST/FOLLOW, a tabela SLR e a tabela de
-símbolos, e analisar uma lista de tokens.
-
-### Modo em lote
+Basta informar a gramática para construir a tabela e ver **todas as etapas**: a
+coleção canônica de itens LR(0), os conjuntos FIRST/FOLLOW e a tabela de análise
+SLR (ACTION/GOTO), além do status SLR(1) e dos conflitos, se houver.
 
 ```
-python3 main.py <gramatica> <tokens> [reservadas]
+python3 main.py tests/gramaticas/expressao.txt
 ```
 
-Exemplo:
+Se uma lista de tokens for informada, além das etapas o programa a analisa
+(aceita/erro, reduções aplicadas) e mostra a tabela de símbolos resultante. Use
+`-r`/`--reservadas` para carregar as palavras reservadas:
 
 ```
-python3 main.py tests/gramaticas/comandos.txt tests/tokens/comandos_ok.txt tests/reservadas/comandos_reservadas.txt
+python3 main.py tests/gramaticas/comandos.txt tests/tokens/comandos_ok.txt -r tests/reservadas/comandos_reservadas.txt
+```
+
+O relatório da análise é impresso na tela; use `-o <arquivo>` (ou `--output`)
+para gravá-lo em arquivo (essa opção exige uma lista de tokens). Use `-h`/`--help`
+para ver todas as opções.
+
+### Comandos prontos para testar
+
+Já dentro de `src/Gerador de Analisadores Sintáticos` (veja o `cd` acima):
+
+```bash
+# Ajuda
+python3 main.py -h
+
+# Só a gramática — mostra todas as etapas (itens LR(0), FIRST/FOLLOW, tabela SLR)
+python3 main.py tests/gramaticas/expressao.txt
+
+# Gramática + tokens — etapas + análise + tabela de símbolos
+python3 main.py tests/gramaticas/expressao.txt tests/tokens/expr_ok.txt
+python3 main.py tests/gramaticas/aritmetica_estendida.txt tests/tokens/aritmetica_ok.txt
+python3 main.py tests/gramaticas/epsilon.txt tests/tokens/epsilon_ok.txt
+
+# Entrada com erro sintático (mostra a posição do erro)
+python3 main.py tests/gramaticas/expressao.txt tests/tokens/expr_erro.txt
+
+# Com palavras reservadas (-r) — resolve begin/end, if/then como PR
+python3 main.py tests/gramaticas/comandos.txt tests/tokens/comandos_ok.txt -r tests/reservadas/comandos_reservadas.txt
+python3 main.py tests/gramaticas/blocos.txt tests/tokens/blocos_ok.txt -r tests/reservadas/blocos_reservadas.txt
+
+# Gramática NÃO SLR(1) — reporta o conflito (dangling-else)
+python3 main.py tests/gramaticas/dangling_else.txt
+
+# Salvar o relatório da análise em arquivo
+python3 main.py tests/gramaticas/comandos.txt tests/tokens/comandos_ok.txt -r tests/reservadas/comandos_reservadas.txt -o relatorio.txt
+```
+
+A partir da **raiz do repositório** (sem `cd`), use os caminhos completos entre
+aspas (há espaços no nome da pasta):
+
+```bash
+python3 "src/Gerador de Analisadores Sintáticos/main.py" \
+        "src/Gerador de Analisadores Sintáticos/tests/gramaticas/expressao.txt" \
+        "src/Gerador de Analisadores Sintáticos/tests/tokens/expr_ok.txt"
 ```
 
 ## Testes

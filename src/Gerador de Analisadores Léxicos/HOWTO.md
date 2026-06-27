@@ -46,7 +46,7 @@ Arquivos de apoio:
 | [regular_definitions.py](regular_definitions.py) | Leitura do arquivo de definições regulares |
 | [lexical_analyzer.py](lexical_analyzer.py) | Interface de projeto: encadeia os quatro algoritmos e gera a tabela |
 | [tokenizer.py](tokenizer.py) | Interface de execução: aplica a tabela ao texto fonte (regra do maior prefixo) |
-| [main.py](main.py) | Interface de linha de comando (menu interativo e modo em lote) |
+| [main.py](main.py) | Interface de linha de comando (argparse): roda toda a cadeia e exibe as etapas |
 
 ## Fluxo de construção
 
@@ -85,30 +85,62 @@ Entre na pasta do projeto antes de rodar (os módulos se importam entre si):
 cd "src/Gerador de Analisadores Léxicos"
 ```
 
-### Menu interativo
-
 ```
-python3 main.py
+python3 main.py <definicoes> [fonte] [-o saida]
 ```
 
-O menu permite carregar as definições, visualizar os AFD de cada ER, os AFD
-minimizados, o AFND da união, a tabela de análise léxica, salvar a tabela em
-arquivo e analisar um texto fonte (de arquivo ou digitado).
-
-### Modo em lote
+Basta informar o arquivo de definições para executar **toda a cadeia** e ver
+**todas as etapas** da construção: o AFD de cada ER (método direto de Aho), os
+AFD minimizados, o AFND da união (com epsilon-transições) e a tabela de análise
+léxica final.
 
 ```
-python3 main.py <definicoes> <fonte> [saida]
+python3 main.py tests/definicoes/exemplo1_id_num.txt
 ```
 
-Exemplo:
+Se um arquivo fonte for informado, além das etapas o programa tokeniza esse
+texto usando a tabela gerada:
 
 ```
 python3 main.py tests/definicoes/exemplo1_id_num.txt tests/fontes/fonte_exemplo1.txt
 ```
 
-Se o terceiro argumento for informado, a lista de tokens é gravada nele; caso
-contrário, é impressa na tela.
+A lista de tokens é impressa na tela; use `-o <arquivo>` (ou `--output`) para
+gravá-la em arquivo (essa opção exige um arquivo fonte). Use `-h`/`--help` para
+ver todas as opções.
+
+### Comandos prontos para testar
+
+Já dentro de `src/Gerador de Analisadores Léxicos` (veja o `cd` acima):
+
+```bash
+# Ajuda
+python3 main.py -h
+
+# Só as definições — mostra todas as etapas da construção
+python3 main.py tests/definicoes/exemplo1_id_num.txt
+
+# Definições + fonte — etapas + tokenização
+python3 main.py tests/definicoes/exemplo1_id_num.txt tests/fontes/fonte_exemplo1.txt
+python3 main.py tests/definicoes/exemplo3_palavras_chave.txt tests/fontes/fonte_exemplo3.txt
+python3 main.py tests/definicoes/exemplo4_numeros.txt tests/fontes/fonte_exemplo4.txt
+python3 main.py tests/definicoes/exemplo5_minilinguagem.txt tests/fontes/fonte_exemplo5.txt
+
+# Fonte com símbolo fora do alfabeto (gera <..., erro!>)
+python3 main.py tests/definicoes/exemplo1_id_num.txt tests/fontes/fonte_com_erro.txt
+
+# Salvar a lista de tokens em arquivo
+python3 main.py tests/definicoes/exemplo1_id_num.txt tests/fontes/fonte_exemplo1.txt -o tokens.txt
+```
+
+A partir da **raiz do repositório** (sem `cd`), use os caminhos completos entre
+aspas (há espaços no nome da pasta):
+
+```bash
+python3 "src/Gerador de Analisadores Léxicos/main.py" \
+        "src/Gerador de Analisadores Léxicos/tests/definicoes/exemplo1_id_num.txt" \
+        "src/Gerador de Analisadores Léxicos/tests/fontes/fonte_exemplo1.txt"
+```
 
 ## Testes
 
