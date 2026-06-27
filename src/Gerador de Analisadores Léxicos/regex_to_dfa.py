@@ -138,8 +138,12 @@ def build_tree(postfix):
         elif token not in OPERATORS:
             stack.append(Node("symbol", symbol=token))
         elif token in ("*", "+", "?"):
+            if not stack:
+                raise ValueError("Expressão regular mal formada.")
             stack.append(Node(token, left=stack.pop()))
         else:
+            if len(stack) < 2:
+                raise ValueError("Expressão regular mal formada.")
             right = stack.pop()
             left = stack.pop()
             stack.append(Node(token, left=left, right=right))
