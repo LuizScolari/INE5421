@@ -1,0 +1,1 @@
+Expressoes aritmeticas com precedencia (+ - * / e parenteses) e atribuicao (programa fonte valido)

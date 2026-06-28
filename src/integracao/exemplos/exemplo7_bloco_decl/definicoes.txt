@@ -1,0 +1,6 @@
+kw: program | var | begin | end
+id: [a-zA-Z]([a-zA-Z] | [0-9])*
+num: [0-9]+
+sep: ;
+atrib: =
+mais: [+]

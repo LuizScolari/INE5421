@@ -1,0 +1,6 @@
+P ::= program D begin S end
+D ::= var id ; D | &
+S ::= C ; S | C
+C ::= id = E
+E ::= E + T | T
+T ::= id | num

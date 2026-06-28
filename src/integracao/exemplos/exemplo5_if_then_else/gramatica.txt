@@ -1,0 +1,3 @@
+S ::= if C then S else S end | id = E
+C ::= E < E | E > E
+E ::= id | num

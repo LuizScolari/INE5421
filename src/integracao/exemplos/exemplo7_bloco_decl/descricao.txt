@@ -1,0 +1,1 @@
+Bloco com declaracoes (var) e lista de comandos; exercita producao vazia (programa fonte valido)
