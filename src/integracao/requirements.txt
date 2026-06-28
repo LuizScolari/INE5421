@@ -1,0 +1,3 @@
+# Dependência da interface gráfica de integração (src/integracao/controller.py).
+# Os geradores léxico e sintático em si não exigem nada além da biblioteca padrão.
+PyQt6
