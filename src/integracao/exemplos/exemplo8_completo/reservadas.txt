@@ -1,0 +1,9 @@
+program
+var
+begin
+end
+if
+then
+else
+while
+do

@@ -1,0 +1,17 @@
+program
+var iffy ;
+var beginner ;
+var ended ;
+begin
+  iffy = 0 ;
+  beginner = a+b*(c-d)/2 ;
+  if iffy < beginner then
+    while ended > 0 do
+      ended = ended - 1 ;
+      iffy = iffy + ( beginner * 2 )
+    end
+  else
+    iffy = ( ( ( beginner ) ) )
+  end ;
+  ended = a - b - c - d
+end

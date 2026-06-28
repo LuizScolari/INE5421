@@ -34,12 +34,21 @@ class SyntacticAnalyzer:
         return self.table
 
     def describe_items(self):
-        """Visualiza a coleção canônica de conjuntos de itens LR(0)."""
+        """Visualiza a coleção canônica de itens LR(0) com as transições GOTO de cada estado."""
         grammar = self.table.grammar
         blocks = []
         for index, items in enumerate(self.table.states):
             ordered = sorted(items, key=lambda item: (item[0], item[1]))
-            lines = [f"I{index}:"] + [f"  {format_item(grammar, item)}" for item in ordered]
+            lines = [f"I{index}:"]
+            lines += [f"  {format_item(grammar, item)}" for item in ordered]
+            saidas = sorted(
+                (symbol, target)
+                for (origem, symbol), target in self.table.transitions.items()
+                if origem == index
+            )
+            if saidas:
+                lines.append("  transicoes:")
+                lines += [f"    I{index} --{symbol}--> I{target}" for symbol, target in saidas]
             blocks.append("\n".join(lines))
         return "\n\n".join(blocks)
 

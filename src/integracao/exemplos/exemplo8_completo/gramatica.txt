@@ -1,0 +1,8 @@
+P ::= program D begin L end
+D ::= var id ; D | &
+L ::= S ; L | S
+S ::= id = E | if C then L else L end | while C do L end
+C ::= E < E | E > E
+E ::= E + T | E - T | T
+T ::= T * F | T / F | F
+F ::= ( E ) | id | num

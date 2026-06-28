@@ -14,7 +14,7 @@ from lr0_items import canonical_collection
 class SLRTable:
     """Tabela SLR com ACTION, GOTO, as produções e os conflitos encontrados."""
 
-    def __init__(self, grammar, states, action, goto, first, follow, conflicts):
+    def __init__(self, grammar, states, action, goto, first, follow, conflicts, transitions=None):
         self.grammar = grammar
         self.states = states
         self.action = action
@@ -22,6 +22,7 @@ class SLRTable:
         self.first = first
         self.follow = follow
         self.conflicts = conflicts
+        self.transitions = transitions if transitions is not None else {}
 
     def is_slr(self):
         """Indica se a tabela foi construída sem conflitos (gramática SLR(1))."""
@@ -67,4 +68,4 @@ def build_slr_table(grammar):
             if target is not None:
                 goto[(state_index, nonterminal)] = target
 
-    return SLRTable(augmented, states, action, goto, first, follow, conflicts)
+    return SLRTable(augmented, states, action, goto, first, follow, conflicts, transitions)
