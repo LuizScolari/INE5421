@@ -8,7 +8,15 @@ informado, tokeniza-o usando a tabela de análise léxica gerada.
 """
 
 import argparse
+import os
 import sys
+
+# Os algoritmos exigidos pelo enunciado ficam em `algoritmos/`; os demais módulos
+# (apoio e interfaces) ficam nesta pasta. Ambos entram no path para que os
+# imports funcionem rodando de qualquer diretório.
+BASE = os.path.dirname(os.path.abspath(__file__))
+sys.path.insert(0, os.path.join(BASE, "algoritmos"))
+sys.path.insert(0, BASE)
 
 from regular_definitions import load_definitions
 from lexical_analyzer import LexicalAnalyzer

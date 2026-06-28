@@ -10,17 +10,18 @@ Tudo foi implementado em Python puro, sem nenhuma biblioteca externa (apenas
 
 ## Algoritmos implementados
 
-Cada algoritmo fica em um arquivo separado e segue exatamente o livro
-*Compilers: Principles, Techniques, and Tools* (Aho, Lam, Sethi, Ullman, 2ª ed.),
-Seção 4.6 (Introduction to LR Parsing: Simple LR):
+Os algoritmos exigidos pelo enunciado ficam na pasta
+[algoritmos/](algoritmos/), cada um em um arquivo separado, e seguem exatamente
+o livro *Compilers: Principles, Techniques, and Tools* (Aho, Lam, Sethi, Ullman,
+2ª ed.), Seção 4.6 (Introduction to LR Parsing: Simple LR):
 
 | Arquivo | Algoritmo | Referência no livro |
 | --- | --- | --- |
-| [first_follow.py](first_follow.py) | (a) Funções FIRST e FOLLOW | Seção 4.4.2 |
-| [lr0_items.py](lr0_items.py) | (b) CLOSURE | **Figura 4.32** |
-| [lr0_items.py](lr0_items.py) | (c) GOTO e coleção canônica de itens LR(0) | **Figura 4.33** e Seção 4.6.2 |
-| [lr_parser.py](lr_parser.py) | (d) Programa de análise LR | **Algoritmo 4.44** / **Figura 4.36** |
-| [slr_table.py](slr_table.py) | (e) Construção da tabela SLR | **Algoritmo 4.46** (citado como 4.38 no enunciado) |
+| [algoritmos/first_follow.py](algoritmos/first_follow.py) | (a) Funções FIRST e FOLLOW | Seção 4.4.2 |
+| [algoritmos/lr0_items.py](algoritmos/lr0_items.py) | (b) CLOSURE | **Figura 4.32** |
+| [algoritmos/lr0_items.py](algoritmos/lr0_items.py) | (c) GOTO e coleção canônica de itens LR(0) | **Figura 4.33** e Seção 4.6.2 |
+| [algoritmos/lr_parser.py](algoritmos/lr_parser.py) | (d) Programa de análise LR | **Algoritmo 4.44** / **Figura 4.36** |
+| [algoritmos/slr_table.py](algoritmos/slr_table.py) | (e) Construção da tabela SLR | **Algoritmo 4.46** (citado como 4.38 no enunciado) |
 
 Arquivos de apoio:
 

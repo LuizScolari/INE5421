@@ -6,15 +6,21 @@ essa lista alimenta o gerador de analisador sintático SLR, que atualiza a tabel
 de símbolos (palavras reservadas e identificadores) e decide se a entrada
 pertence à linguagem da gramática.
 
-Execute a partir da pasta `src`:  python3 teste_integracao.py
+Execução (de qualquer diretório):  python3 src/integracao/teste_integracao.py
 """
 
 import os
 import sys
 
 BASE = os.path.dirname(os.path.abspath(__file__))
-sys.path.insert(0, os.path.join(BASE, "Gerador de Analisadores Léxicos"))
-sys.path.insert(0, os.path.join(BASE, "Gerador de Analisadores Sintáticos"))
+SRC = os.path.dirname(BASE)
+LEXICO = os.path.join(SRC, "Gerador de Analisadores Léxicos")
+SINTATICO = os.path.join(SRC, "Gerador de Analisadores Sintáticos")
+# Cada gerador tem os algoritmos do enunciado em `algoritmos/` e os módulos de
+# apoio/interface na própria pasta; ambos entram no path.
+for pasta in (LEXICO, SINTATICO):
+    sys.path.insert(0, os.path.join(pasta, "algoritmos"))
+    sys.path.insert(0, pasta)
 
 from regular_definitions import parse_definitions
 from lexical_analyzer import LexicalAnalyzer

@@ -10,7 +10,9 @@ import os
 import sys
 
 HERE = os.path.dirname(os.path.abspath(__file__))
-sys.path.insert(0, os.path.dirname(HERE))
+GEN = os.path.dirname(HERE)
+sys.path.insert(0, os.path.join(GEN, "algoritmos"))
+sys.path.insert(0, GEN)
 
 from grammar import load_grammar
 from slr_table import build_slr_table

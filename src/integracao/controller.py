@@ -17,15 +17,21 @@ os dados no repositório garante que léxico e sintático "conversem" (os tokens
 gerados são exatamente os terminais que a gramática reconhece) e torna a demo
 reprodutível.
 
-Execução (de qualquer diretório):  python3 src/controller.py
+Execução (de qualquer diretório):  python3 src/integracao/controller.py
 """
 
 import os
 import sys
 
 BASE = os.path.dirname(os.path.abspath(__file__))
-sys.path.insert(0, os.path.join(BASE, "Gerador de Analisadores Léxicos"))
-sys.path.insert(0, os.path.join(BASE, "Gerador de Analisadores Sintáticos"))
+SRC = os.path.dirname(BASE)
+LEXICO = os.path.join(SRC, "Gerador de Analisadores Léxicos")
+SINTATICO = os.path.join(SRC, "Gerador de Analisadores Sintáticos")
+# Cada gerador tem os algoritmos do enunciado em `algoritmos/` e os módulos de
+# apoio/interface na própria pasta; ambos entram no path.
+for pasta in (LEXICO, SINTATICO):
+    sys.path.insert(0, os.path.join(pasta, "algoritmos"))
+    sys.path.insert(0, pasta)
 
 # Trabalho 1 (léxico)
 from regular_definitions import load_definitions

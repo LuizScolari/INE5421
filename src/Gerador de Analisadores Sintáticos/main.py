@@ -7,7 +7,15 @@ for informada, analisa-a e mostra o resultado e a tabela de símbolos.
 """
 
 import argparse
+import os
 import sys
+
+# Os algoritmos exigidos pelo enunciado ficam em `algoritmos/`; os demais módulos
+# (apoio e interfaces) ficam nesta pasta. Ambos entram no path para que os
+# imports funcionem rodando de qualquer diretório.
+BASE = os.path.dirname(os.path.abspath(__file__))
+sys.path.insert(0, os.path.join(BASE, "algoritmos"))
+sys.path.insert(0, BASE)
 
 from syntactic_analyzer import SyntacticAnalyzer
 from lr_parser import parse

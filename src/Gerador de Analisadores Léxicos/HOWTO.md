@@ -9,15 +9,17 @@ externa (apenas `sys` e `os` da biblioteca padrão, para entrada/saída).
 
 ## Algoritmos implementados
 
-Cada algoritmo fica em um arquivo separado e segue exatamente o livro
-*Compilers: Principles, Techniques, and Tools* (Aho, Lam, Sethi, Ullman, 2ª ed.):
+Os quatro algoritmos exigidos pelo enunciado ficam na pasta
+[algoritmos/](algoritmos/), cada um em um arquivo separado, e seguem exatamente
+o livro *Compilers: Principles, Techniques, and Tools* (Aho, Lam, Sethi, Ullman,
+2ª ed.):
 
 | Arquivo | Algoritmo | Referência no livro |
 | --- | --- | --- |
-| [regex_to_dfa.py](regex_to_dfa.py) | (a) ER → AFD (método direto: árvore sintática, `nullable`/`firstpos`/`lastpos`/`followpos`) | **Algoritmo 3.36** e Fig. 3.62; funções da **Fig. 3.58** e Seção 3.9.4 |
-| [minimization.py](minimization.py) | (b) Minimização de AFD (refinamento de partições) | **Algoritmo 3.39** e Fig. 3.64; "Eliminating the Dead State" |
-| [union.py](union.py) | (c) União de autômatos via epsilon-transição | Seção 3.8.3 e Fig. 3.50/3.52 |
-| [determinization.py](determinization.py) | (d) Determinização (construção de subconjuntos com fecho-epsilon) | **Algoritmo 3.20** e Fig. 3.32/3.33 |
+| [algoritmos/regex_to_dfa.py](algoritmos/regex_to_dfa.py) | (a) ER → AFD (método direto: árvore sintática, `nullable`/`firstpos`/`lastpos`/`followpos`) | **Algoritmo 3.36** e Fig. 3.62; funções da **Fig. 3.58** e Seção 3.9.4 |
+| [algoritmos/minimization.py](algoritmos/minimization.py) | (b) Minimização de AFD (refinamento de partições) | **Algoritmo 3.39** e Fig. 3.64; "Eliminating the Dead State" |
+| [algoritmos/union.py](algoritmos/union.py) | (c) União de autômatos via epsilon-transição | Seção 3.8.3 e Fig. 3.50/3.52 |
+| [algoritmos/determinization.py](algoritmos/determinization.py) | (d) Determinização (construção de subconjuntos com fecho-epsilon) | **Algoritmo 3.20** e Fig. 3.32/3.33 |
 
 ### Aderência ao livro
 
