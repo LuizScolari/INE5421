@@ -5,8 +5,7 @@ faz parte dos algoritmos — só `sys` e `os` da stdlib, para leitura de arquivo
 e argumentos de linha de comando.
 
 A referência seguida foi o Aho (*Compilers: Principles, Techniques, and Tools*,
-2ª ed.). Detalhes de cada algoritmo com justificativa no livro estão em
-[DOCUMENTACAO_DETALHADA.md](DOCUMENTACAO_DETALHADA.md).
+2ª ed.).
 
 ---
 
