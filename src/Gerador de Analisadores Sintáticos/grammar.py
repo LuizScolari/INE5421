@@ -1,21 +1,9 @@
-"""Estrutura de dados de Gramática Livre de Contexto e leitura do arquivo.
-
-A gramática é lida no formato `<Não terminal> ::= <Corpo da produção>`, com uma
-produção por linha (alternativas separadas por `|` também são aceitas). Os
-símbolos do corpo são separados por espaços; um não terminal é todo símbolo que
-aparece do lado esquerdo de alguma produção, e os demais símbolos são terminais.
-O épsilon é escrito como `&` e representado internamente por um corpo vazio.
-
-Para a construção SLR a gramática é aumentada com uma nova produção `S' ::= S`
-(Seção 4.6 do livro do Aho), usada para sinalizar a aceitação da entrada.
-"""
-
 EPSILON = "&"
 ENDMARK = "$"
 
 
 class Production:
-    """Produção `lhs -> rhs`; rhs é uma tupla de símbolos (vazia para épsilon)."""
+    """produção `lhs -> rhs`; rhs é uma tupla de símbolos (vazia para épsilon)"""
 
     def __init__(self, index, lhs, rhs):
         self.index = index
@@ -23,13 +11,13 @@ class Production:
         self.rhs = tuple(rhs)
 
     def text(self):
-        """Devolve a produção em forma legível, usando `&` para o corpo vazio."""
+        """devolve a produção em forma legível, usando `&` para o corpo vazio"""
         body = " ".join(self.rhs) if self.rhs else EPSILON
         return f"{self.lhs} -> {body}"
 
 
 class Grammar:
-    """Gramática com não terminais, terminais, produções e símbolo inicial."""
+    """gramática com não terminais, terminais, produções e símbolo inicial"""
 
     def __init__(self):
         self.nonterminals = []
@@ -38,15 +26,15 @@ class Grammar:
         self.start = None
 
     def symbols(self):
-        """Devolve todos os símbolos da gramática (não terminais e terminais)."""
+        """devolve todos os símbolos da gramática (não terminais e terminais)"""
         return self.nonterminals + self.terminals
 
     def productions_for(self, nonterminal):
-        """Lista as produções cujo lado esquerdo é o não terminal informado."""
+        """lista as produções cujo lado esquerdo é o não terminal informado"""
         return [prod for prod in self.productions if prod.lhs == nonterminal]
 
     def augmented(self):
-        """Devolve uma cópia aumentada com a produção `S' -> S` na posição 0."""
+        """devolve uma cópia aumentada com a produção `S' -> S` na posição 0"""
         new_start = self.start + "'"
         while new_start in self.nonterminals:
             new_start += "'"
@@ -62,7 +50,7 @@ class Grammar:
 
 
 def parse_grammar(text):
-    """Lê o texto de uma GLC e devolve a gramática correspondente."""
+    """lê o texto de uma GLC e devolve a gramática correspondente"""
     raw_productions = []
     nonterminals = []
     for number, line in enumerate(text.splitlines(), start=1):
@@ -102,6 +90,6 @@ def parse_grammar(text):
 
 
 def load_grammar(path):
-    """Carrega a gramática de um arquivo no disco."""
+    """carrega a gramática de um arquivo no disco"""
     with open(path, "r", encoding="utf-8") as handle:
         return parse_grammar(handle.read())

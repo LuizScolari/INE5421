@@ -1,19 +1,5 @@
-"""Tabela de símbolos e leitura da lista de tokens do analisador léxico.
-
-A tabela é pré-carregada com as palavras reservadas, todas na categoria `PR`
-(palavra-reservada). Ao processar um token do analisador léxico (Trabalho 1), no
-formato `<lexema, padrão>`, aplica-se a regra do enunciado: se o lexema já está
-na tabela (palavra reservada), devolve-se o token lá indicado, por exemplo
-`<for, PR>`; caso contrário o lexema é inserido e devolve-se `<id, linha>`, onde
-`linha` é a posição na tabela em que o identificador foi armazenado.
-
-Cada token também é convertido no terminal correspondente da gramática, usado
-pelo analisador sintático.
-"""
-
-
 class SymbolTable:
-    """Tabela de símbolos com palavras reservadas e identificadores."""
+    """tabela de símbolos com palavras reservadas e identificadores"""
 
     def __init__(self, reserved_words=()):
         self.entries = []
@@ -22,24 +8,18 @@ class SymbolTable:
             self._insert(word, "PR")
 
     def _insert(self, lexeme, category):
-        """Insere um lexema e devolve a linha em que foi armazenado."""
+        """insere um lexema e devolve a linha em que foi armazenado"""
         line = len(self.entries)
         self.entries.append((lexeme, category))
         self.index_of[lexeme] = line
         return line
 
     def is_reserved(self, lexeme):
-        """Indica se o lexema é uma palavra reservada já registrada."""
+        """indica se o lexema é uma palavra reservada já registrada"""
         return self.index_of.get(lexeme) is not None and self.entries[self.index_of[lexeme]][1] == "PR"
 
     def resolve(self, lexeme, pattern, grammar_terminals):
-        """Devolve o token de saída e o terminal de gramática para um lexema.
-
-        Palavras reservadas e símbolos que já são terminais da gramática usam o
-        próprio lexema; tokens cujo padrão é um terminal (como `num`) usam o
-        padrão; os identificadores são inseridos na tabela e devolvem `id` com a
-        linha em que foram armazenados.
-        """
+        """devolve o token de saída e o terminal de gramática para o lexema (reservada e terminal usam o lexema; num usa o padrão; o resto vira id)"""
         if self.is_reserved(lexeme):
             return (lexeme, "PR"), lexeme
         if lexeme in grammar_terminals:
@@ -52,7 +32,7 @@ class SymbolTable:
         return ("id", line), "id"
 
     def to_table(self):
-        """Monta uma visualização textual da tabela de símbolos."""
+        """monta uma visualização textual da tabela de símbolos"""
         lines = ["linha | lexema | categoria", "------+--------+----------"]
         for line, (lexeme, category) in enumerate(self.entries):
             lines.append(f"{line:<5} | {lexeme:<6} | {category}")
@@ -60,7 +40,7 @@ class SymbolTable:
 
 
 def parse_token_list(text):
-    """Lê a saída do analisador léxico (`<lexema, padrão>`, um por linha)."""
+    """lê a saída do analisador léxico (`<lexema, padrão>`, um por linha)"""
     tokens = []
     for number, line in enumerate(text.splitlines(), start=1):
         stripped = line.strip()
@@ -75,7 +55,7 @@ def parse_token_list(text):
 
 
 def tokens_to_terminals(tokens, symbol_table, grammar_terminals):
-    """Converte os tokens em terminais da gramática, atualizando a tabela de símbolos."""
+    """converte os tokens em terminais da gramática, atualizando a tabela de símbolos"""
     terminals = []
     resolved = []
     for lexeme, pattern in tokens:

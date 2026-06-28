@@ -1,17 +1,8 @@
-"""Algoritmo (a): cálculo das funções FIRST e FOLLOW (Seção 4.4.2 do Aho).
-
-FIRST(X) é o conjunto de terminais que iniciam as cadeias deriváveis de X, com
-`&` incluído quando X deriva a cadeia vazia. FOLLOW(A) é o conjunto de terminais
-que podem aparecer imediatamente à direita de A em alguma forma sentencial, com
-`$` para o fim de entrada. Ambos são calculados por iteração até o ponto fixo,
-seguindo exatamente as regras do livro.
-"""
-
 from grammar import EPSILON, ENDMARK
 
 
 def first_of_sequence(first, symbols):
-    """FIRST de uma sequência de símbolos a partir dos conjuntos FIRST já calculados."""
+    """calcula o FIRST de uma sequência de símbolos a partir dos FIRST já conhecidos"""
     result = set()
     all_nullable = True
     for symbol in symbols:
@@ -26,7 +17,7 @@ def first_of_sequence(first, symbols):
 
 
 def compute_first(grammar):
-    """Calcula FIRST para todos os símbolos da gramática (regras 1 a 3 da Seção 4.4.2)."""
+    """calcula FIRST para todos os símbolos da gramática (regras 1 a 3 da Seção 4.4.2)"""
     first = {terminal: {terminal} for terminal in grammar.terminals}
     for nonterminal in grammar.nonterminals:
         first[nonterminal] = set()
@@ -47,7 +38,7 @@ def compute_first(grammar):
 
 
 def compute_follow(grammar, first):
-    """Calcula FOLLOW para todos os não terminais (regras 1 a 3 da Seção 4.4.2)."""
+    """calcula FOLLOW para todos os não terminais (regras 1 a 3 da Seção 4.4.2)"""
     follow = {nonterminal: set() for nonterminal in grammar.nonterminals}
     follow[grammar.start].add(ENDMARK)
 

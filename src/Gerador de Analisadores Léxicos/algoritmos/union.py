@@ -1,16 +1,8 @@
-"""Algoritmo (c): união de Autômatos via epsilon-transição.
-
-Cria um novo estado inicial e o liga, por epsilon-transição (símbolo '&'), ao
-estado inicial de cada autômato recebido. Os estados de cada autômato são
-renomeados com um prefixo próprio para evitar colisões. O resultado é um AFND
-cujos estados finais mantêm o rótulo do token que reconhecem.
-"""
-
 from automaton import Automaton, EPSILON
 
 
 def union(automata):
-    """Une vários autômatos em um único AFND ligado por epsilon-transições."""
+    """une vários autômatos em um único AFND ligado por epsilon-transições"""
     result = Automaton()
     start = "S"
     result.set_initial(start)

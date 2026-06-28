@@ -1,11 +1,3 @@
-"""Testes automatizados do Gerador de Analisador Sintático SLR.
-
-Cobrem a fidelidade ao livro do Aho (gramática de expressões da Seção 4.6:
-12 estados, FIRST/FOLLOW do Exemplo 4.30 e a sequência de reduções da Figura
-4.38), o tratamento de produções com épsilon e a integração com a tabela de
-símbolos e as palavras reservadas (formato de tokens do Trabalho 1).
-"""
-
 import os
 import sys
 
@@ -24,7 +16,7 @@ RESULTS = []
 
 
 def check(description, condition):
-    """Registra o resultado de uma verificação booleana."""
+    """registra o resultado de uma verificação booleana"""
     RESULTS.append((description, bool(condition)))
 
 
@@ -38,7 +30,7 @@ def read(*parts):
 
 
 def test_expression_grammar():
-    """Gramática de expressões: confere estados, FIRST/FOLLOW e reduções (livro)."""
+    """gramática de expressões: confere estados, FIRST/FOLLOW e reduções (livro)"""
     grammar = load_grammar(grammar_path("expressao.txt"))
     table = build_slr_table(grammar)
     check("Expressao: 12 estados (Fig 4.31)", len(table.states) == 12)
@@ -58,7 +50,7 @@ def test_expression_grammar():
 
 
 def test_epsilon_grammar():
-    """Gramática com épsilon: confere FIRST/FOLLOW e aceitação."""
+    """gramática com épsilon: confere FIRST/FOLLOW e aceitação"""
     grammar = load_grammar(grammar_path("epsilon.txt"))
     table = build_slr_table(grammar)
     check("Epsilon: FIRST(A) = {a, &}", table.first["A"] == {"a", "&"})
@@ -70,7 +62,7 @@ def test_epsilon_grammar():
 
 
 def test_reserved_words():
-    """Gramática com palavras reservadas: integra tabela de símbolos e tokens."""
+    """gramática com palavras reservadas: integra tabela de símbolos e tokens"""
     analyzer = SyntacticAnalyzer(read("gramaticas", "comandos.txt"), ["begin", "end"])
     analyzer.build()
     check("Comandos: sem conflitos (SLR(1))", analyzer.table.is_slr())
@@ -85,7 +77,7 @@ def test_reserved_words():
 
 
 def test_extended_arithmetic():
-    """Aritmética com + - * / e parênteses: confere estados e análise (token-file)."""
+    """aritmética com + - * / e parênteses: confere estados e análise (token-file)"""
     grammar = load_grammar(grammar_path("aritmetica_estendida.txt"))
     table = build_slr_table(grammar)
     check("Aritmetica: 17 estados", len(table.states) == 17)
@@ -108,7 +100,7 @@ def test_extended_arithmetic():
 
 
 def test_calls_epsilon():
-    """Chamadas com lista de argumentos e produção épsilon (ARGS -> &)."""
+    """chamadas com lista de argumentos e produção épsilon (ARGS -> &)"""
     grammar = load_grammar(grammar_path("chamadas.txt"))
     table = build_slr_table(grammar)
     check("Chamadas: sem conflitos (SLR(1))", table.is_slr())
@@ -122,7 +114,7 @@ def test_calls_epsilon():
 
 
 def test_blocks():
-    """Blocos aninhados com if-then, atribuições e expressões (token-file)."""
+    """blocos aninhados com if-then, atribuições e expressões (token-file)"""
     analyzer = SyntacticAnalyzer(read("gramaticas", "blocos.txt"), ["if", "then"])
     analyzer.build()
     check("Blocos: 24 estados", len(analyzer.table.states) == 24)
@@ -139,7 +131,7 @@ def test_blocks():
 
 
 def test_non_slr():
-    """Gramática ambígua (dangling-else): deve acusar conflito (não é SLR(1))."""
+    """gramática ambígua (dangling-else): deve acusar conflito (não é SLR(1))"""
     grammar = load_grammar(grammar_path("dangling_else.txt"))
     table = build_slr_table(grammar)
     check("Dangling-else: nao e SLR(1)", not table.is_slr())
@@ -147,7 +139,7 @@ def test_non_slr():
 
 
 def leaves(node):
-    """Folhas da árvore de derivação, da esquerda para a direita."""
+    """folhas da árvore de derivação, da esquerda para a direita"""
     if node.is_leaf():
         return [node.symbol]
     collected = []
@@ -157,7 +149,7 @@ def leaves(node):
 
 
 def test_derivation_tree():
-    """Árvore de derivação: caso normal, produção épsilon e caso de erro."""
+    """árvore de derivação: caso normal, produção épsilon e caso de erro"""
     # Caso normal: as folhas (esq->dir) reproduzem a entrada e a raiz e o inicial.
     table = build_slr_table(load_grammar(grammar_path("expressao.txt")))
     ok = parse(table, ["id", "*", "id", "+", "id"])
@@ -186,7 +178,7 @@ def test_derivation_tree():
 
 
 def main():
-    """Roda todos os testes e informa o total de verificações aprovadas."""
+    """roda todos os testes e informa o total de verificações aprovadas"""
     test_expression_grammar()
     test_epsilon_grammar()
     test_reserved_words()

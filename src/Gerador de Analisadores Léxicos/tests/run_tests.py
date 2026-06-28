@@ -1,11 +1,3 @@
-"""Testes automatizados do Gerador de Analisador Léxico.
-
-Constrói a tabela de análise léxica para cada conjunto de definições e compara a
-lista de tokens gerada com o resultado esperado. Os casos cobrem os exemplos do
-enunciado e situações adicionais (palavras-chave com prioridade, maior prefixo e
-relato de erro).
-"""
-
 import os
 import sys
 
@@ -20,7 +12,7 @@ from tokenizer import tokenize, format_tokens
 
 
 def analyze(definitions_file, source):
-    """Gera a tabela a partir do arquivo de definições e tokeniza o texto fonte."""
+    """gera a tabela a partir do arquivo de definições e tokeniza o texto fonte"""
     path = os.path.join(HERE, "definicoes", definitions_file)
     analyzer = LexicalAnalyzer(load_definitions(path))
     analyzer.build()
@@ -101,7 +93,7 @@ CASES = [
 
 
 def main():
-    """Roda todos os casos de teste e informa o total de aprovados."""
+    """roda todos os casos de teste e informa o total de aprovados"""
     passed = 0
     for description, definitions_file, source, expected in CASES:
         produced = analyze(definitions_file, source)

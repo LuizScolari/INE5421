@@ -1,11 +1,3 @@
-"""Interface de projeto do Gerador de Analisador Léxico.
-
-Reúne os quatro algoritmos para, a partir das definições regulares, produzir a
-tabela de análise léxica. O fluxo segue o enunciado: cada expressão regular vira
-um AFD, cada AFD é minimizado, todos são unidos por epsilon-transição e o AFND
-resultante é determinizado, gerando a tabela de análise léxica.
-"""
-
 from regex_to_dfa import regex_to_dfa
 from minimization import minimize
 from union import union
@@ -13,7 +5,7 @@ from determinization import determinize
 
 
 class LexicalAnalyzer:
-    """Constrói e guarda os autômatos intermediários e a tabela de análise léxica."""
+    """constrói e guarda os autômatos intermediários e a tabela de análise léxica"""
 
     def __init__(self, definitions):
         self.definitions = definitions
@@ -24,7 +16,7 @@ class LexicalAnalyzer:
         self.table = None
 
     def build(self):
-        """Executa toda a cadeia de algoritmos e produz a tabela de análise léxica."""
+        """executa toda a cadeia de algoritmos e produz a tabela de análise léxica"""
         for name, expression in self.definitions:
             dfa = regex_to_dfa(expression, token=name)
             self.dfas.append((name, dfa))
@@ -36,7 +28,7 @@ class LexicalAnalyzer:
         return self.table
 
     def describe(self):
-        """Devolve uma visualização textual de todas as etapas da construção."""
+        """devolve uma visualização textual de todas as etapas da construção"""
         blocks = []
         for name, dfa in self.dfas:
             blocks.append(dfa.to_table(f"AFD da ER '{name}' (algoritmo de Aho):"))

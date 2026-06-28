@@ -1,18 +1,10 @@
-"""Interface de projeto do Gerador de Analisador Sintático SLR.
-
-Reúne os algoritmos do livro para, a partir de uma Gramática Livre de Contexto e
-da lista de palavras reservadas, construir a tabela de análise SLR. Oferece ainda
-visualizações da coleção canônica de itens, dos conjuntos FIRST/FOLLOW e da
-tabela ACTION/GOTO.
-"""
-
 from grammar import parse_grammar, ENDMARK
 from slr_table import build_slr_table
 from symbol_table import SymbolTable
 
 
 def format_item(grammar, item):
-    """Formata um item LR(0) `(producao, ponto)` como `A -> alfa . beta`."""
+    """formata um item LR(0) `(producao, ponto)` como `A -> alfa . beta`"""
     production_index, dot = item
     production = grammar.productions[production_index]
     body = list(production.rhs)
@@ -21,7 +13,7 @@ def format_item(grammar, item):
 
 
 class SyntacticAnalyzer:
-    """Constrói e guarda a tabela SLR e a tabela de símbolos do analisador."""
+    """constrói e guarda a tabela SLR e a tabela de símbolos do analisador"""
 
     def __init__(self, grammar_text, reserved_words=()):
         self.grammar = parse_grammar(grammar_text)
@@ -29,12 +21,12 @@ class SyntacticAnalyzer:
         self.table = None
 
     def build(self):
-        """Constrói a tabela de análise SLR para a gramática fornecida."""
+        """constrói a tabela de análise SLR para a gramática fornecida"""
         self.table = build_slr_table(self.grammar)
         return self.table
 
     def describe_items(self):
-        """Visualiza a coleção canônica de itens LR(0) com as transições GOTO de cada estado."""
+        """visualiza a coleção canônica de itens LR(0) com as transições GOTO de cada estado"""
         grammar = self.table.grammar
         blocks = []
         for index, items in enumerate(self.table.states):
@@ -53,7 +45,7 @@ class SyntacticAnalyzer:
         return "\n\n".join(blocks)
 
     def describe_first_follow(self):
-        """Visualiza os conjuntos FIRST e FOLLOW dos não terminais da gramática."""
+        """visualiza os conjuntos FIRST e FOLLOW dos não terminais da gramática"""
         lines = ["FIRST e FOLLOW:"]
         for nonterminal in self.grammar.nonterminals:
             first = "{" + ", ".join(sorted(self.table.first[nonterminal])) + "}"
@@ -62,7 +54,7 @@ class SyntacticAnalyzer:
         return "\n".join(lines)
 
     def describe_table(self):
-        """Visualiza a tabela de análise SLR (ACTION e GOTO), no estilo da Fig. 4.37."""
+        """visualiza a tabela de análise SLR (ACTION e GOTO), no estilo da Fig. 4.37"""
         grammar = self.table.grammar
         terminals = list(grammar.terminals) + [ENDMARK]
         nonterminals = [nt for nt in grammar.nonterminals if nt != grammar.start]
@@ -94,7 +86,7 @@ class SyntacticAnalyzer:
 
 
 def _format_action(move):
-    """Converte uma ação da tabela em texto: shift->sj, reduce->rp, accept->acc."""
+    """converte uma ação da tabela em texto: shift->sj, reduce->rp, accept->acc"""
     if move is None:
         return ""
     if move[0] == "shift":

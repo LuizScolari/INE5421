@@ -1,15 +1,5 @@
-"""Algoritmos (b) e (c): itens LR(0), CLOSURE, GOTO e coleção canônica.
-
-Um item LR(0) é representado pelo par `(indice_da_producao, posicao_do_ponto)`,
-como sugerido no quadro "Representing Item Sets" do livro. CLOSURE segue a
-Figura 4.32, GOTO segue a definição da Seção 4.6.2 e a coleção canônica de
-conjuntos de itens segue o algoritmo da Figura 4.33, sempre sobre a gramática
-aumentada `G'`.
-"""
-
-
 def closure(grammar, items):
-    """CLOSURE de um conjunto de itens (Figura 4.32 do livro)."""
+    """fecho de um conjunto de itens LR(0) (Figura 4.32 do livro)"""
     result = set(items)
     changed = True
     while changed:
@@ -28,7 +18,7 @@ def closure(grammar, items):
 
 
 def goto(grammar, items, symbol):
-    """GOTO(I, X): avança o ponto sobre o símbolo X e fecha o resultado."""
+    """avança o ponto sobre o símbolo X e fecha o conjunto resultante (GOTO)"""
     moved = set()
     for production_index, dot in items:
         rhs = grammar.productions[production_index].rhs
@@ -40,11 +30,7 @@ def goto(grammar, items, symbol):
 
 
 def canonical_collection(grammar):
-    """Constrói a coleção canônica de conjuntos de itens LR(0) (Figura 4.33).
-
-    Devolve a lista de estados (conjuntos de itens) e a função GOTO codificada
-    como um dicionário `(indice_estado, simbolo) -> indice_estado`.
-    """
+    """constrói a coleção canônica de itens LR(0); devolve os estados e o GOTO como dicionário (estado, simbolo) -> estado"""
     start_item = (0, 0)
     initial = closure(grammar, {start_item})
     states = [initial]

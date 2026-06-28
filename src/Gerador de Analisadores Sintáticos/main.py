@@ -1,11 +1,3 @@
-"""Interface de linha de comando do Gerador de Analisador Sintático SLR.
-
-Recebe uma gramática livre de contexto e constrói a tabela de análise SLR pelo
-`SyntacticAnalyzer`, exibindo todas as etapas: a coleção canônica de itens
-LR(0), os conjuntos FIRST/FOLLOW e a tabela ACTION/GOTO. Se uma lista de tokens
-for informada, analisa-a e mostra o resultado e a tabela de símbolos.
-"""
-
 import argparse
 import os
 import sys
@@ -23,7 +15,7 @@ from symbol_table import parse_token_list, tokens_to_terminals
 
 
 def load_reserved(path):
-    """Lê as palavras reservadas de um arquivo (uma por linha); arquivo opcional."""
+    """lê as palavras reservadas de um arquivo (uma por linha); arquivo opcional"""
     if not path:
         return []
     with open(path, "r", encoding="utf-8") as handle:
@@ -31,7 +23,7 @@ def load_reserved(path):
 
 
 def build_analyzer(grammar_path, reserved_path=None):
-    """Cria o analisador e constrói a tabela SLR a partir dos arquivos informados."""
+    """cria o analisador e constrói a tabela SLR a partir dos arquivos informados"""
     with open(grammar_path, "r", encoding="utf-8") as handle:
         grammar_text = handle.read()
     analyzer = SyntacticAnalyzer(grammar_text, load_reserved(reserved_path))
@@ -40,7 +32,7 @@ def build_analyzer(grammar_path, reserved_path=None):
 
 
 def analyze_tokens(analyzer, token_text):
-    """Analisa uma lista de tokens e devolve o relatório textual do resultado."""
+    """analisa uma lista de tokens e devolve o relatório textual do resultado"""
     tokens = parse_token_list(token_text)
     terminals, resolved = tokens_to_terminals(tokens, analyzer.symbol_table, set(analyzer.grammar.terminals))
     result = parse(analyzer.table, terminals)
@@ -60,7 +52,7 @@ def analyze_tokens(analyzer, token_text):
 
 
 def describe_all(analyzer):
-    """Monta a visualização completa da construção do analisador SLR."""
+    """monta a visualização completa da construção do analisador SLR"""
     blocks = [
         "Colecao canonica de itens LR(0):\n\n" + analyzer.describe_items(),
         analyzer.describe_first_follow(),
@@ -70,7 +62,7 @@ def describe_all(analyzer):
 
 
 def build_parser():
-    """Monta o parser de argumentos da linha de comando."""
+    """monta o parser de argumentos da linha de comando"""
     parser = argparse.ArgumentParser(
         prog="main.py",
         description="Constrói o analisador sintático SLR a partir de uma gramática, "
@@ -101,7 +93,7 @@ def build_parser():
 
 
 def main(argv=None):
-    """Constrói a tabela SLR, exibe as etapas e analisa os tokens se informados."""
+    """constrói a tabela SLR, exibe as etapas e analisa os tokens se informados"""
     parser = build_parser()
     args = parser.parse_args(argv)
 

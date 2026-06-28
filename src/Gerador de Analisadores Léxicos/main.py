@@ -1,12 +1,3 @@
-"""Interface de linha de comando do Gerador de Analisador Léxico.
-
-Recebe um arquivo de definições regulares e executa toda a cadeia de algoritmos
-pelo `LexicalAnalyzer` (cada ER vira um AFD pelo método direto de Aho, cada AFD é
-minimizado, todos são unidos por epsilon-transição e o AFND resultante é
-determinizado). Exibe todas as etapas da construção e, se um arquivo fonte for
-informado, tokeniza-o usando a tabela de análise léxica gerada.
-"""
-
 import argparse
 import os
 import sys
@@ -24,7 +15,7 @@ from tokenizer import tokenize, format_tokens
 
 
 def build_parser():
-    """Monta o parser de argumentos da linha de comando."""
+    """monta o parser de argumentos da linha de comando"""
     parser = argparse.ArgumentParser(
         prog="main.py",
         description="Gera o analisador léxico a partir de definições regulares, "
@@ -50,7 +41,7 @@ def build_parser():
 
 
 def main(argv=None):
-    """Executa a cadeia completa e exibe as etapas; tokeniza o fonte se informado."""
+    """executa a cadeia completa e exibe as etapas; tokeniza o fonte se informado"""
     parser = build_parser()
     args = parser.parse_args(argv)
 

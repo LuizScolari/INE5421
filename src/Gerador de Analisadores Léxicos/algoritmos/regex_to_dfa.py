@@ -1,21 +1,3 @@
-"""Algoritmo (a): conversão de Expressão Regular para AFD.
-
-Implementa o método direto da Seção 3.9 do livro do Aho (Algoritmo 3.36). A
-expressão é aumentada com o marcador de fim `#`, transformada em uma árvore
-sintática e, a partir das funções nullable, firstpos, lastpos e followpos
-(Figura 3.58 e Seção 3.9.4), o AFD é construído diretamente (Figura 3.62).
-
-Os operadores estendidos `+` e `?` e os grupos `[...]` são abreviações (Seção
-3.3.5) e são expandidos para os operadores básicos união `|`, concatenação e
-fecho `*` antes de montar a árvore, usando as identidades `r+ = rr*`, `r? = r|&`
-e `[a-c] = a|b|c`. Assim as quatro funções usam exatamente as regras da Fig. 3.58.
-
-Para usar como símbolo literal um caractere que também é metacaractere de ER
-(`( ) * + ? | .`), coloque-o numa classe: `[+]`, `[*]`, `[(]`; o conteúdo de uma
-classe `[...]` é sempre tratado como literal (Seção 3.3.5). O epsilon `&` e o
-marcador de fim `#` permanecem reservados e não podem ser símbolos do alfabeto.
-"""
-
 from automaton import Automaton
 
 OPERATORS = {"*", "+", "?", "|", "."}
@@ -26,7 +8,7 @@ RESERVED = {EPSILON, ENDMARKER}
 
 
 class Node:
-    """Nó da árvore sintática; após a expansão só há 'symbol', 'epsilon', '|', '.' e '*'."""
+    """nó da árvore sintática; após a expansão só há 'symbol', 'epsilon', '|', '.' e '*'"""
 
     def __init__(self, kind, symbol=None, left=None, right=None):
         self.kind = kind
@@ -40,7 +22,7 @@ class Node:
 
 
 def _expand_group(content):
-    """Expande o conteúdo de um grupo em uma lista de símbolos individuais."""
+    """expande o conteúdo de um grupo em uma lista de símbolos individuais"""
     members = []
     index = 0
     while index < len(content):
@@ -57,19 +39,14 @@ def _expand_group(content):
 
 
 def _literal(char):
-    """Valida um caractere usado como símbolo literal dentro de uma classe."""
+    """valida um caractere usado como símbolo literal dentro de uma classe"""
     if char in RESERVED:
         raise ValueError(f"Símbolo '{char}' é reservado e não pode ser literal.")
     return char
 
 
 def to_tokens(regex):
-    """Lê a ER como tokens tipados (kind, value), com kind 'op', 'sym' ou 'eps'.
-
-    Trata classes `[...]`, cujos membros são sempre literais (assim `[+]` é o
-    caractere `+`, e não o operador). O epsilon `&` vira um token 'eps'; `&` e
-    `#` não podem ser símbolos do alfabeto.
-    """
+    """lê a ER como tokens tipados (kind, value), onde kind é 'op', 'sym' ou 'eps'; dentro de [...] tudo é literal"""
     tokens = []
     index = 0
     length = len(regex)
@@ -106,7 +83,7 @@ def to_tokens(regex):
 
 
 def add_concatenation(tokens):
-    """Insere o operador de concatenação '.' explicitamente entre os tokens."""
+    """insere o operador de concatenação '.' explicitamente entre os tokens"""
     closing = {("op", ")"), ("op", "*"), ("op", "+"), ("op", "?")}
     result = []
     for index, token in enumerate(tokens):
@@ -122,7 +99,7 @@ def add_concatenation(tokens):
 
 
 def to_postfix(tokens):
-    """Converte a sequência de tokens tipados para notação posfixa (shunting-yard)."""
+    """converte a sequência de tokens tipados para notação posfixa (shunting-yard)"""
     output = []
     operators = []
     for kind, value in tokens:
@@ -151,7 +128,7 @@ def to_postfix(tokens):
 
 
 def build_tree(postfix):
-    """Constrói a árvore sintática a partir da expressão tipada em notação posfixa."""
+    """constrói a árvore sintática a partir da expressão tipada em notação posfixa"""
     stack = []
     for kind, value in postfix:
         if kind == "eps":
@@ -174,7 +151,7 @@ def build_tree(postfix):
 
 
 def copy_subtree(node):
-    """Duplica uma subárvore, usado na expansão de `r+` em `rr*`."""
+    """duplica uma subárvore, usado na expansão de `r+` em `rr*`"""
     clone = Node(node.kind, symbol=node.symbol)
     if node.left is not None:
         clone.left = copy_subtree(node.left)
@@ -184,7 +161,7 @@ def copy_subtree(node):
 
 
 def desugar(node):
-    """Reescreve os operadores `+` e `?` usando apenas união, concatenação e fecho."""
+    """reescreve os operadores `+` e `?` usando apenas união, concatenação e fecho"""
     if node.kind in ("symbol", "epsilon"):
         return node
     if node.kind in ("|", "."):
@@ -204,7 +181,7 @@ def desugar(node):
 
 
 def assign_positions(node, counter, symbol_at):
-    """Numera as folhas de símbolo (incluindo `#`) da esquerda para a direita."""
+    """numera as folhas de símbolo (incluindo `#`) da esquerda para a direita"""
     if node is None or node.kind == "epsilon":
         return
     if node.kind == "symbol":
@@ -217,7 +194,7 @@ def assign_positions(node, counter, symbol_at):
 
 
 def annotate(node, followpos):
-    """Calcula nullable, firstpos, lastpos e followpos pelas regras da Figura 3.58."""
+    """calcula nullable, firstpos, lastpos e followpos pelas regras da Figura 3.58"""
     if node.kind == "epsilon":
         node.nullable = True
         node.firstpos = set()
@@ -256,7 +233,7 @@ def annotate(node, followpos):
 
 
 def regex_to_dfa(regex, token=None):
-    """Converte uma expressão regular em um AFD rotulado pelo token informado."""
+    """converte uma expressão regular em um AFD rotulado pelo token informado"""
     postfix = to_postfix(add_concatenation(to_tokens(regex)))
     tree = desugar(build_tree(postfix))
 

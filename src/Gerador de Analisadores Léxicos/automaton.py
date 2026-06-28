@@ -1,16 +1,8 @@
-"""Estrutura de dados de Autômato Finito usada por todos os algoritmos.
-
-O mesmo objeto representa tanto um AFD quanto um AFND. As transições são
-guardadas como um dicionário de conjuntos, de forma que um AFND com várias
-transições para o mesmo símbolo e um AFD com transição única compartilham a
-mesma representação. A epsilon-transição usa o símbolo '&'.
-"""
-
 EPSILON = "&"
 
 
 class Automaton:
-    """Autômato finito com estados, alfabeto, transições e rótulos de token."""
+    """autômato finito com estados, alfabeto, transições e rótulos de token"""
 
     def __init__(self):
         self.states = set()
@@ -21,7 +13,7 @@ class Automaton:
         self.token_of = {}
 
     def add_state(self, state, accepting=False, token=None):
-        """Inclui um estado, opcionalmente marcando-o como final e seu token."""
+        """inclui um estado, opcionalmente marcando-o como final e seu token"""
         self.states.add(state)
         if state not in self.transitions:
             self.transitions[state] = {}
@@ -31,12 +23,12 @@ class Automaton:
                 self.token_of[state] = token
 
     def set_initial(self, state):
-        """Define o estado inicial, garantindo que ele exista."""
+        """define o estado inicial, garantindo que ele exista"""
         self.add_state(state)
         self.initial = state
 
     def add_transition(self, source, symbol, target):
-        """Acrescenta a transição source --symbol--> target ao autômato."""
+        """acrescenta a transição source --symbol--> target ao autômato"""
         self.add_state(source)
         self.add_state(target)
         if symbol != EPSILON:
@@ -44,18 +36,18 @@ class Automaton:
         self.transitions[source].setdefault(symbol, set()).add(target)
 
     def move(self, state, symbol):
-        """Retorna o conjunto de estados alcançados a partir de state por symbol."""
+        """retorna o conjunto de estados alcançados a partir de state por symbol"""
         return self.transitions.get(state, {}).get(symbol, set())
 
     def step(self, state, symbol):
-        """Retorna o único destino de um AFD ou None quando não há transição."""
+        """retorna o único destino de um AFD ou None quando não há transição"""
         targets = self.move(state, symbol)
         if not targets:
             return None
         return next(iter(targets))
 
     def is_deterministic(self):
-        """Indica se o autômato é determinístico (sem epsilon e sem ramificação)."""
+        """indica se o autômato é determinístico (sem epsilon e sem ramificação)"""
         for source in self.transitions.values():
             for symbol, targets in source.items():
                 if symbol == EPSILON or len(targets) > 1:
@@ -63,7 +55,7 @@ class Automaton:
         return True
 
     def rename(self, prefix="q"):
-        """Devolve uma cópia com estados renomeados em ordem de alcance (BFS)."""
+        """devolve uma cópia com estados renomeados em ordem de alcance (BFS)"""
         order = []
         seen = set()
         queue = [self.initial] if self.initial is not None else []
@@ -99,7 +91,7 @@ class Automaton:
         return renamed
 
     def to_table(self, title=None):
-        """Monta uma representação textual do autômato em forma de tabela."""
+        """monta uma representação textual do autômato em forma de tabela"""
         symbols = sorted(self.alphabet)
         has_epsilon = any(EPSILON in by_symbol for by_symbol in self.transitions.values())
         columns = symbols + ([EPSILON] if has_epsilon else [])

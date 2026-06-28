@@ -1,16 +1,8 @@
-"""Algoritmo (d): determinização de Autômatos (construção de subconjuntos).
-
-Transforma um AFND (possivelmente com epsilon-transições) em um AFD. Cada estado
-do AFD corresponde a um conjunto de estados do AFND fechado por epsilon. Quando
-um conjunto contém estados finais de tokens diferentes, vence o token de maior
-prioridade, definida pela ordem em que as expressões regulares foram declaradas.
-"""
-
 from automaton import Automaton, EPSILON
 
 
 def epsilon_closure(automaton, states):
-    """Calcula o fecho-epsilon de um conjunto de estados."""
+    """calcula o fecho-epsilon de um conjunto de estados"""
     closure = set(states)
     stack = list(states)
     while stack:
@@ -23,7 +15,7 @@ def epsilon_closure(automaton, states):
 
 
 def _choose_token(automaton, subset, priority):
-    """Seleciona o token de maior prioridade entre os estados finais do subconjunto."""
+    """seleciona o token de maior prioridade entre os estados finais do subconjunto"""
     best = None
     for state in subset:
         if state in automaton.accepting:
@@ -35,7 +27,7 @@ def _choose_token(automaton, subset, priority):
 
 
 def determinize(automaton, priority=None):
-    """Determiniza um AFND gerando o AFD equivalente com rótulos de token."""
+    """determiniza um AFND gerando o AFD equivalente com rótulos de token"""
     priority = priority or {}
     alphabet = sorted(automaton.alphabet)
 

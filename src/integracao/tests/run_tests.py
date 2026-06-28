@@ -1,23 +1,12 @@
-"""Testes de integração entre o Trabalho 1 (léxico) e o Trabalho 2 (sintático).
-
-Roda o pipeline completo — programa fonte -> tokens do analisador léxico ->
-terminais via tabela de símbolos -> análise SLR — e confere o resultado. Cobre um
-caso embutido (while/do) e todos os exemplos da pasta `exemplos/` de ponta a
-ponta: os exemplos com "erro" no nome devem ser rejeitados; os demais, aceitos.
-
-Basta rodar este único arquivo para executar tudo:
-
-    python3 src/integracao/tests/run_tests.py
-"""
-
 import os
 import sys
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 INTEGRACAO = os.path.dirname(HERE)
 SRC = os.path.dirname(INTEGRACAO)
-# Cada gerador tem os algoritmos do enunciado em `algoritmos/` e os módulos de
-# apoio/interface na própria pasta; ambos entram no path.
+
+# cada gerador tem os algoritmos do enunciado em `algoritmos/` e os módulos de
+# apoio/interface na própria pasta; ambos entram no path
 for nome_pasta in ("Gerador de Analisadores Léxicos", "Gerador de Analisadores Sintáticos"):
     pasta = os.path.join(SRC, nome_pasta)
     sys.path.insert(0, os.path.join(pasta, "algoritmos"))
@@ -36,12 +25,12 @@ RESULTS = []
 
 
 def check(description, condition):
-    """Registra o resultado de uma verificação booleana."""
+    """registra o resultado de uma verificação booleana"""
     RESULTS.append((description, bool(condition)))
 
 
 def run_pipeline(definicoes_texto, gramatica, reservadas, fonte):
-    """Executa léxico -> integração -> sintático e devolve (terminais, resultado)."""
+    """executa léxico -> integração -> sintático e devolve (terminais, resultado)"""
     lexico = LexicalAnalyzer(parse_definitions(definicoes_texto))
     lexico.build()
     saida_lexico = format_tokens(tokenize(lexico.table, fonte))
@@ -70,7 +59,7 @@ E ::= id | num
 
 
 def test_caso_embutido():
-    """Caso embutido while/do: confere terminais, aceitação e árvore de derivação."""
+    """caso embutido while/do: confere terminais, aceitação e árvore de derivação"""
     terminais, resultado = run_pipeline(
         DEFINICOES, GRAMATICA, ["while", "do"], "while a < b do c = 1")
     esperado = ["while", "id", "<", "id", "do", "id", "=", "num"]
@@ -80,7 +69,7 @@ def test_caso_embutido():
 
 
 def _ler(pasta, arquivo, opcional=False):
-    """Lê um arquivo do exemplo; devolve string vazia se opcional e ausente."""
+    """lê um arquivo do exemplo; devolve string vazia se opcional e ausente"""
     caminho = os.path.join(pasta, arquivo)
     if opcional and not os.path.exists(caminho):
         return ""
@@ -89,7 +78,7 @@ def _ler(pasta, arquivo, opcional=False):
 
 
 def test_exemplos():
-    """Roda cada exemplo de `exemplos/` de ponta a ponta (aceito x erro pelo nome)."""
+    """roda cada exemplo de `exemplos/` de ponta a ponta (aceito x erro pelo nome)"""
     if not os.path.isdir(EXEMPLOS_DIR):
         check("Exemplos: pasta exemplos/ encontrada", False)
         return
@@ -119,7 +108,7 @@ def test_exemplos():
 
 
 def main():
-    """Roda todos os testes e informa o total de verificações aprovadas."""
+    """roda todos os testes e informa o total de verificações aprovadas"""
     test_caso_embutido()
     test_exemplos()
     passed = 0

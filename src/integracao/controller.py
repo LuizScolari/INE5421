@@ -1,20 +1,3 @@
-"""Interface gráfica de integração: Analisador Léxico (T1) -> Sintático (T2).
-
-Aplicação PyQt6 (mesma biblioteca usada no projeto de referência GALS) que roda o
-pipeline completo e mostra todas as etapas em abas:
-
-  - Entrada: definições regulares, gramática, palavras reservadas e programa fonte
-    (preenchidos a partir dos exemplos da pasta `exemplos/` ou editados à mão).
-  - Léxico (T1): etapas da construção (AFDs, minimização, união, tabela final) e a
-    lista de tokens `<lexema, padrão>`.
-  - Integração: resolução de cada token em um terminal via tabela de símbolos.
-  - Sintático (T2): itens LR(0), FIRST/FOLLOW, tabela SLR (ACTION/GOTO) e o
-    resultado da análise com a árvore de derivação.
-  - Tabela de símbolos final.
-
-Execução (de qualquer diretório):  python3 src/integracao/controller.py
-"""
-
 import os
 import sys
 
@@ -22,8 +5,9 @@ BASE = os.path.dirname(os.path.abspath(__file__))
 SRC = os.path.dirname(BASE)
 LEXICO = os.path.join(SRC, "Gerador de Analisadores Léxicos")
 SINTATICO = os.path.join(SRC, "Gerador de Analisadores Sintáticos")
-# Cada gerador tem os algoritmos do enunciado em `algoritmos/` e os módulos de
-# apoio/interface na própria pasta; ambos entram no path.
+
+# cada gerador tem os algoritmos do enunciado em `algoritmos/` e os módulos de
+# apoio/interface na própria pasta; ambos entram no path
 for pasta in (LEXICO, SINTATICO):
     sys.path.insert(0, os.path.join(pasta, "algoritmos"))
     sys.path.insert(0, pasta)
@@ -53,11 +37,9 @@ except ModuleNotFoundError:
 EXEMPLOS_DIR = os.path.join(BASE, "exemplos")
 
 
-# --------------------------------------------------------------------------- #
 # Leitura dos exemplos do repositório
-# --------------------------------------------------------------------------- #
 def listar_exemplos():
-    """Lista as pastas de exemplo disponíveis em `exemplos/`."""
+    """lista as pastas de exemplo disponíveis em `exemplos/`"""
     if not os.path.isdir(EXEMPLOS_DIR):
         return []
     return sorted(
@@ -67,7 +49,7 @@ def listar_exemplos():
 
 
 def descricao_de(nome):
-    """Devolve a descrição (primeira linha de descricao.txt) ou o próprio nome."""
+    """devolve a descrição (primeira linha de descricao.txt) ou o próprio nome"""
     caminho = os.path.join(EXEMPLOS_DIR, nome, "descricao.txt")
     if os.path.exists(caminho):
         with open(caminho, "r", encoding="utf-8") as handle:
@@ -78,7 +60,7 @@ def descricao_de(nome):
 
 
 def carregar_exemplo_textos(nome):
-    """Lê os textos crus de um exemplo (reservadas.txt é opcional)."""
+    """lê os textos crus de um exemplo (reservadas.txt é opcional)"""
     pasta = os.path.join(EXEMPLOS_DIR, nome)
 
     def ler(arquivo, opcional=False):
@@ -92,11 +74,9 @@ def carregar_exemplo_textos(nome):
             ler("reservadas.txt", opcional=True), ler("fonte.txt"))
 
 
-# --------------------------------------------------------------------------- #
 # Pipeline completo (lógica; devolve os blocos de resultado para a interface)
-# --------------------------------------------------------------------------- #
 def executar_pipeline(definicoes, gramatica, reservadas, fonte):
-    """Roda léxico -> integração -> sintático e devolve os dados para exibição."""
+    """roda léxico -> integração -> sintático e devolve os dados para exibição"""
     lexico = LexicalAnalyzer(definicoes)
     lexico.build()
     saida_lexico = format_tokens(tokenize(lexico.table, fonte))
@@ -137,9 +117,7 @@ def executar_pipeline(definicoes, gramatica, reservadas, fonte):
     }
 
 
-# --------------------------------------------------------------------------- #
 # Helpers de interface
-# --------------------------------------------------------------------------- #
 STYLE = """
 QMainWindow, QWidget { background: #f4f6f8; color: #1f2933; }
 QLabel#titulo { font-size: 16px; font-weight: bold; color: #1f2933; }
@@ -165,7 +143,7 @@ QLabel#aviso { background: #fff4f4; color: #8a1f1f; border: 1px solid #f0b4b4;
 
 
 def _mono_font():
-    """Fonte monoespaçada para as áreas de código/tabela (preserva alinhamento)."""
+    """fonte monoespaçada para as áreas de código/tabela (preserva alinhamento)"""
     font = QtGui.QFont("Menlo")
     font.setStyleHint(QtGui.QFont.StyleHint.Monospace)
     font.setPointSize(11)
@@ -173,7 +151,7 @@ def _mono_font():
 
 
 def _code_view(wrap=False):
-    """Área de texto somente leitura, monoespaçada."""
+    """área de texto somente leitura, monoespaçada"""
     view = QtWidgets.QPlainTextEdit()
     view.setReadOnly(True)
     view.setFont(_mono_font())
@@ -183,7 +161,7 @@ def _code_view(wrap=False):
 
 
 def _editor(placeholder=""):
-    """Editor de texto monoespaçado para os campos de entrada."""
+    """editor de texto monoespaçado para os campos de entrada"""
     editor = QtWidgets.QPlainTextEdit()
     editor.setFont(_mono_font())
     editor.setPlaceholderText(placeholder)
@@ -191,7 +169,7 @@ def _editor(placeholder=""):
 
 
 def _grupo(titulo, widget):
-    """Envolve um widget numa caixa com título."""
+    """envolve um widget numa caixa com título"""
     box = QtWidgets.QGroupBox(titulo)
     layout = QtWidgets.QVBoxLayout(box)
     layout.addWidget(widget)
@@ -199,7 +177,7 @@ def _grupo(titulo, widget):
 
 
 def _tabela():
-    """QTableView somente leitura, no estilo das tabelas do projeto de referência."""
+    """tabela (QTableView) somente leitura, no estilo das tabelas do projeto de referência"""
     view = QtWidgets.QTableView()
     view.setFont(_mono_font())
     view.setEditTriggers(QtWidgets.QAbstractItemView.EditTrigger.NoEditTriggers)
@@ -208,7 +186,7 @@ def _tabela():
 
 
 def _model(headers, rows):
-    """Monta um QStandardItemModel a partir de cabeçalhos e linhas (não editável)."""
+    """monta um QStandardItemModel a partir de cabeçalhos e linhas (não editável)"""
     model = QtGui.QStandardItemModel()
     model.setHorizontalHeaderLabels(headers)
     for row in rows:
@@ -220,7 +198,7 @@ def _model(headers, rows):
 
 
 def _fmt_action(move):
-    """Formata uma ação da tabela SLR: shift->sj, reduce->rj, accept->acc."""
+    """formata uma ação da tabela SLR: shift->sj, reduce->rj, accept->acc"""
     if move is None:
         return ""
     if move[0] == "shift":
@@ -231,7 +209,7 @@ def _fmt_action(move):
 
 
 def _slr_rows(table):
-    """Gera (cabeçalhos, linhas) da tabela SLR (ACTION | GOTO) para o QTableView."""
+    """gera (cabeçalhos, linhas) da tabela SLR (ACTION | GOTO) para o QTableView"""
     grammar = table.grammar
     terminals = list(grammar.terminals) + [ENDMARK]
     nonterminals = [nt for nt in grammar.nonterminals if nt != grammar.start]
@@ -246,10 +224,10 @@ def _slr_rows(table):
 
 
 def _slr_conflitos_texto(table):
-    """Texto de aviso quando a gramática não é SLR(1); '' quando não há conflitos.
+    """texto de aviso quando a gramática não é SLR(1); vazio quando não há conflitos
 
-    Cada conflito guardado na tabela é `(estado, terminal, acao_existente, acao_nova)`;
-    as ações são formatadas como na tabela (sj, rj, acc) para facilitar a leitura.
+    cada conflito é `(estado, terminal, acao_existente, acao_nova)`; as ações são
+    formatadas como na tabela (sj, rj, acc).
     """
     if table.is_slr():
         return ""
@@ -261,11 +239,8 @@ def _slr_conflitos_texto(table):
     return "\n".join(linhas)
 
 
-# --------------------------------------------------------------------------- #
-# Janela principal
-# --------------------------------------------------------------------------- #
 class IntegracaoWindow(QtWidgets.QMainWindow):
-    """Janela com a barra de exemplos e as abas do pipeline."""
+    """janela com a barra de exemplos e as abas do pipeline"""
 
     def __init__(self):
         super().__init__()
@@ -275,7 +250,7 @@ class IntegracaoWindow(QtWidgets.QMainWindow):
         self._popular_exemplos()
         self.setStyleSheet(STYLE)
 
-    # ----- construção da interface ------------------------------------------ #
+    # construção da interface 
     def _build_ui(self):
         central = QtWidgets.QWidget()
         self.setCentralWidget(central)
@@ -371,7 +346,7 @@ class IntegracaoWindow(QtWidgets.QMainWindow):
         self.tabs.addTab(_grupo("Tabela de simbolos final", self.txt_simbolos),
                          "5. Tabela de simbolos")
 
-    # ----- ações ------------------------------------------------------------ #
+    # ações
     def _popular_exemplos(self):
         self.combo.clear()
         exemplos = listar_exemplos()
@@ -438,7 +413,7 @@ class IntegracaoWindow(QtWidgets.QMainWindow):
 
 
 def main():
-    """Inicia a aplicação gráfica."""
+    """inicia a aplicação gráfica"""
     app = QtWidgets.QApplication(sys.argv)
     app.setApplicationName("INE5421 Integracao")
     window = IntegracaoWindow()

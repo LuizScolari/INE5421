@@ -1,15 +1,5 @@
-"""Interface de execução do analisador léxico.
-
-Usa a tabela de análise léxica (AFD final) para varrer um texto fonte e produzir
-a lista de tokens. A varredura segue a regra do maior prefixo: a cada posição
-reconhece o lexema mais longo aceito pelo autômato. Espaços em branco separam os
-lexemas. Quando nenhum prefixo válido é encontrado, o trecho é reportado como
-erro no formato <lexema, erro!>.
-"""
-
-
 def tokenize(table, text):
-    """Varre o texto fonte e devolve a lista de pares (lexema, token_ou_None)."""
+    """varre o texto fonte e devolve a lista de pares (lexema, token_ou_None)"""
     tokens = []
     position = 0
     length = len(text)
@@ -45,7 +35,7 @@ def tokenize(table, text):
 
 
 def format_tokens(tokens):
-    """Formata a lista de tokens conforme o enunciado (<lexema, padrão>)."""
+    """formata a lista de tokens conforme o enunciado (<lexema, padrão>)"""
     lines = []
     for lexeme, token in tokens:
         if token is None:

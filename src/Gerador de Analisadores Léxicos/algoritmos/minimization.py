@@ -1,23 +1,10 @@
-"""Algoritmo (b): minimização de AFD (Algoritmo 3.39 do livro do Aho).
-
-Completa o autômato com um estado morto que recebe as transições ausentes,
-parte da partição inicial {finais, não-finais} e a refina pelo procedimento da
-Figura 3.64: dois estados permanecem no mesmo grupo enquanto, para todo símbolo,
-levarem a estados de um mesmo grupo. Ao final, constrói o AFD mínimo escolhendo
-um representante por grupo (passo 4) e elimina o estado morto, conforme a seção
-"Eliminating the Dead State".
-
-Para o caso do analisador léxico (Seção 3.9.7), os estados finais são separados
-na partição inicial por token, de modo que cada grupo reconhece um único padrão.
-"""
-
 from automaton import Automaton
 
 DEAD = object()
 
 
 def _delta(dfa, state, symbol):
-    """Função de transição completa: devolve o estado morto quando não há transição."""
+    """transição completa: devolve o estado morto quando não há transição"""
     if state is DEAD:
         return DEAD
     target = dfa.step(state, symbol)
@@ -25,7 +12,7 @@ def _delta(dfa, state, symbol):
 
 
 def minimize(dfa):
-    """Minimiza um AFD preservando os rótulos de token dos estados finais."""
+    """minimiza um AFD preservando os rótulos de token dos estados finais"""
     symbols = sorted(dfa.alphabet)
     states = list(dfa.states) + [DEAD]
 

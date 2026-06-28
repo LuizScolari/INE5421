@@ -1,18 +1,10 @@
-"""Algoritmo (e): construção da tabela de análise SLR (Algoritmo 4.46 do Aho).
-
-A partir da coleção canônica de itens LR(0) e dos conjuntos FOLLOW, monta as
-funções ACTION e GOTO. As ações são `('shift', j)`, `('reduce', p)` e
-`('accept',)`. Conflitos entre ações em uma mesma célula indicam que a gramática
-não é SLR(1); eles são registrados em vez de interromper a construção.
-"""
-
 from grammar import ENDMARK
 from first_follow import compute_first, compute_follow
 from lr0_items import canonical_collection
 
 
 class SLRTable:
-    """Tabela SLR com ACTION, GOTO, as produções e os conflitos encontrados."""
+    """tabela SLR com ACTION, GOTO, as produções e os conflitos encontrados"""
 
     def __init__(self, grammar, states, action, goto, first, follow, conflicts, transitions=None):
         self.grammar = grammar
@@ -25,12 +17,12 @@ class SLRTable:
         self.transitions = transitions if transitions is not None else {}
 
     def is_slr(self):
-        """Indica se a tabela foi construída sem conflitos (gramática SLR(1))."""
+        """indica se a tabela foi construída sem conflitos (gramática SLR(1))"""
         return not self.conflicts
 
 
 def build_slr_table(grammar):
-    """Constrói a tabela SLR para uma gramática, aumentando-a antes (Algoritmo 4.46)."""
+    """constrói a tabela SLR para uma gramática, aumentando-a antes (Algoritmo 4.46)"""
     augmented = grammar.augmented()
     first = compute_first(augmented)
     follow = compute_follow(augmented, first)
