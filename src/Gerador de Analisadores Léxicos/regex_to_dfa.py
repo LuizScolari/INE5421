@@ -9,6 +9,11 @@ Os operadores estendidos `+` e `?` e os grupos `[...]` são abreviações (Seç�
 3.3.5) e são expandidos para os operadores básicos união `|`, concatenação e
 fecho `*` antes de montar a árvore, usando as identidades `r+ = rr*`, `r? = r|&`
 e `[a-c] = a|b|c`. Assim as quatro funções usam exatamente as regras da Fig. 3.58.
+
+Para usar como símbolo literal um caractere que também é metacaractere de ER
+(`( ) * + ? | .`), coloque-o numa classe: `[+]`, `[*]`, `[(]`; o conteúdo de uma
+classe `[...]` é sempre tratado como literal (Seção 3.3.5). O epsilon `&` e o
+marcador de fim `#` permanecem reservados e não podem ser símbolos do alfabeto.
 """
 
 from automaton import Automaton
@@ -17,6 +22,7 @@ OPERATORS = {"*", "+", "?", "|", "."}
 PRECEDENCE = {"|": 1, ".": 2, "*": 3, "+": 3, "?": 3}
 EPSILON = "&"
 ENDMARKER = "#"
+RESERVED = {EPSILON, ENDMARKER}
 
 
 class Node:
@@ -31,27 +37,6 @@ class Node:
         self.nullable = False
         self.firstpos = set()
         self.lastpos = set()
-
-
-def expand_classes(regex):
-    """Substitui grupos como [a-z] pela alternação equivalente (a|b|...), conforme a Seção 3.3.5."""
-    output = []
-    index = 0
-    while index < len(regex):
-        char = regex[index]
-        if char == "[":
-            end = regex.find("]", index)
-            if end == -1:
-                raise ValueError("Grupo '[' sem ']' correspondente.")
-            members = _expand_group(regex[index + 1:end])
-            output.append("(")
-            output.append("|".join(members))
-            output.append(")")
-            index = end + 1
-        else:
-            output.append(char)
-            index += 1
-    return "".join(output)
 
 
 def _expand_group(content):
@@ -71,16 +56,52 @@ def _expand_group(content):
     return members
 
 
+def _literal(char):
+    """Valida um caractere usado como símbolo literal dentro de uma classe."""
+    if char in RESERVED:
+        raise ValueError(f"Símbolo '{char}' é reservado e não pode ser literal.")
+    return char
+
+
 def to_tokens(regex):
-    """Lê a expressão regular como uma lista de símbolos e operadores."""
+    """Lê a ER como tokens tipados (kind, value), com kind 'op', 'sym' ou 'eps'.
+
+    Trata classes `[...]`, cujos membros são sempre literais (assim `[+]` é o
+    caractere `+`, e não o operador). O epsilon `&` vira um token 'eps'; `&` e
+    `#` não podem ser símbolos do alfabeto.
+    """
     tokens = []
-    for char in regex:
+    index = 0
+    length = len(regex)
+    while index < length:
+        char = regex[index]
         if char == " ":
-            continue
-        if char in OPERATORS or char in "()":
+            index += 1
+        elif char == "[":
+            end = regex.find("]", index)
+            if end == -1:
+                raise ValueError("Grupo '[' sem ']' correspondente.")
+            members = _expand_group(regex[index + 1:end])
+            if not members:
+                raise ValueError("Grupo de caracteres '[]' vazio.")
+            tokens.append(("op", "("))
+            for position, member in enumerate(members):
+                if position > 0:
+                    tokens.append(("op", "|"))
+                tokens.append(("sym", _literal(member)))
+            tokens.append(("op", ")"))
+            index = end + 1
+        elif char in OPERATORS or char in "()":
             tokens.append(("op", char))
+            index += 1
+        elif char == EPSILON:
+            tokens.append(("eps", char))
+            index += 1
+        elif char == ENDMARKER:
+            raise ValueError("Símbolo '#' é reservado (marcador de fim).")
         else:
             tokens.append(("sym", char))
+            index += 1
     return tokens
 
 
@@ -93,31 +114,31 @@ def add_concatenation(tokens):
         if index + 1 >= len(tokens):
             break
         nxt = tokens[index + 1]
-        left_closes = token[0] == "sym" or token in closing
-        right_opens = nxt[0] == "sym" or nxt == ("op", "(")
+        left_closes = token[0] in ("sym", "eps") or token in closing
+        right_opens = nxt[0] in ("sym", "eps") or nxt == ("op", "(")
         if left_closes and right_opens:
             result.append(("op", "."))
     return result
 
 
 def to_postfix(tokens):
-    """Converte a sequência de tokens para notação posfixa (shunting-yard)."""
+    """Converte a sequência de tokens tipados para notação posfixa (shunting-yard)."""
     output = []
     operators = []
     for kind, value in tokens:
-        if kind == "sym":
-            output.append(value)
+        if kind in ("sym", "eps"):
+            output.append((kind, value))
         elif value in ("*", "+", "?"):
-            output.append(value)
+            output.append(("op", value))
         elif value in ("|", "."):
             while operators and operators[-1] != "(" and PRECEDENCE[operators[-1]] >= PRECEDENCE[value]:
-                output.append(operators.pop())
+                output.append(("op", operators.pop()))
             operators.append(value)
         elif value == "(":
             operators.append("(")
         elif value == ")":
             while operators and operators[-1] != "(":
-                output.append(operators.pop())
+                output.append(("op", operators.pop()))
             if not operators:
                 raise ValueError("Parêntese ')' sem '(' correspondente.")
             operators.pop()
@@ -125,28 +146,28 @@ def to_postfix(tokens):
         top = operators.pop()
         if top == "(":
             raise ValueError("Parêntese '(' sem ')' correspondente.")
-        output.append(top)
+        output.append(("op", top))
     return output
 
 
 def build_tree(postfix):
-    """Constrói a árvore sintática a partir da expressão em notação posfixa."""
+    """Constrói a árvore sintática a partir da expressão tipada em notação posfixa."""
     stack = []
-    for token in postfix:
-        if token == EPSILON:
+    for kind, value in postfix:
+        if kind == "eps":
             stack.append(Node("epsilon"))
-        elif token not in OPERATORS:
-            stack.append(Node("symbol", symbol=token))
-        elif token in ("*", "+", "?"):
+        elif kind == "sym":
+            stack.append(Node("symbol", symbol=value))
+        elif value in ("*", "+", "?"):
             if not stack:
                 raise ValueError("Expressão regular mal formada.")
-            stack.append(Node(token, left=stack.pop()))
+            stack.append(Node(value, left=stack.pop()))
         else:
             if len(stack) < 2:
                 raise ValueError("Expressão regular mal formada.")
             right = stack.pop()
             left = stack.pop()
-            stack.append(Node(token, left=left, right=right))
+            stack.append(Node(value, left=left, right=right))
     if len(stack) != 1:
         raise ValueError("Expressão regular mal formada.")
     return stack.pop()
@@ -236,8 +257,7 @@ def annotate(node, followpos):
 
 def regex_to_dfa(regex, token=None):
     """Converte uma expressão regular em um AFD rotulado pelo token informado."""
-    expanded = expand_classes(regex)
-    postfix = to_postfix(add_concatenation(to_tokens(expanded)))
+    postfix = to_postfix(add_concatenation(to_tokens(regex)))
     tree = desugar(build_tree(postfix))
 
     end_leaf = Node("symbol", symbol=ENDMARKER)

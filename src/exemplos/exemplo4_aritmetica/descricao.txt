@@ -1,0 +1,1 @@
+Expressoes aritmeticas com + * ( ) como tokens literais (programa fonte valido)

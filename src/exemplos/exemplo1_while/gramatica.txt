@@ -1,0 +1,4 @@
+S ::= while C do S | A
+C ::= id < id
+A ::= id = E
+E ::= id | num

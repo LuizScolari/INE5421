@@ -72,6 +72,22 @@ Espaços dentro da expressão são ignorados (servem apenas para legibilidade) e
 epsilon é escrito como `&`. A ordem das definições define a prioridade entre os
 tokens: em caso de empate, vence o token declarado primeiro.
 
+### Símbolos literais que também são metacaracteres
+
+Para reconhecer como símbolo do alfabeto um caractere que também é metacaractere
+de ER (`( ) * + ? | .`), coloque-o numa **classe de caracteres**: o conteúdo de
+`[...]` é sempre tratado como literal (Seção 3.3.5 do Aho).
+
+```
+mais: [+]
+vezes: [*]
+apar: [(]
+fpar: [)]
+```
+
+O epsilon `&` e o marcador de fim `#` continuam reservados e não podem ser
+símbolos do alfabeto (tentar usá-los como literal gera erro).
+
 ## Formato de saída
 
 Para cada lexema reconhecido o programa emite `<lexema, padrão>`; quando um

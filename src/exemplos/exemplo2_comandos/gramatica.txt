@@ -1,0 +1,4 @@
+P ::= begin S end
+S ::= C ; S | C
+C ::= id = E
+E ::= id | num

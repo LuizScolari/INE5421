@@ -1,0 +1,1 @@
+Comandos com erro sintatico (atribuicao sem expressao)
