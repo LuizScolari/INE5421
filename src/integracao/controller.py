@@ -156,7 +156,7 @@ QTabBar::tab { background: #e4e7eb; padding: 8px 16px; margin-right: 2px;
                border-top-left-radius: 6px; border-top-right-radius: 6px; }
 QTabBar::tab:selected { background: #2563eb; color: white; }
 QPlainTextEdit, QListWidget, QTableView { border: 1px solid #cbd2d9; border-radius: 6px;
-               background: white; }
+               background: white; alternate-background-color: #eef2f7; color: #1f2933; }
 QHeaderView::section { background: #334e68; color: white; padding: 4px; border: none; }
 QComboBox { background: white; border: 1px solid #9aa5b1; border-radius: 6px; padding: 4px 8px; }
 """
