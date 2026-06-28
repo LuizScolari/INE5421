@@ -91,7 +91,10 @@ python3 main.py tests/gramaticas/expressao.txt
 ```
 
 Se uma lista de tokens for informada, além das etapas o programa a analisa
-(aceita/erro, reduções aplicadas) e mostra a tabela de símbolos resultante. Use
+(aceita/erro, reduções aplicadas e a árvore de derivação) e mostra a tabela de
+símbolos resultante. A árvore é montada durante a análise — cada redução
+`A -> X1 ... Xk` cria um nó `A` com os k símbolos como filhos, e uma produção
+vazia `A -> &` vira um nó `A` com uma folha `&` (todos os casos cobertos). Use
 `-r`/`--reservadas` para carregar as palavras reservadas:
 
 ```

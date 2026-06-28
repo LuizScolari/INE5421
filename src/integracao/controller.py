@@ -175,6 +175,8 @@ def executar(definicoes, gramatica, reservadas, fonte):
         linhas.append("\nReducoes aplicadas (na ordem):")
         for producao in resultado.reductions:
             linhas.append(f"  {producao.text()}")
+        linhas.append("\nArvore de derivacao:")
+        linhas.append("  " + resultado.tree.render().replace("\n", "\n  "))
     else:
         linhas.append(f"Resultado: ERRO sintatico na posicao {resultado.error_position} "
                       f"(simbolo '{resultado.error_symbol}').")

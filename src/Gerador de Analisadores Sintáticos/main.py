@@ -51,6 +51,8 @@ def analyze_tokens(analyzer, token_text):
         lines.append("Reducoes aplicadas:")
         for production in result.reductions:
             lines.append(f"  {production.text()}")
+        lines.append("\nArvore de derivacao:")
+        lines.append("  " + result.tree.render().replace("\n", "\n  "))
     else:
         symbol = result.error_symbol
         lines.append(f"Resultado: ERRO sintatico na posicao {result.error_position} (simbolo '{symbol}')")

@@ -146,6 +146,45 @@ def test_non_slr():
     check("Dangling-else: conflito reportado", len(table.conflicts) >= 1)
 
 
+def leaves(node):
+    """Folhas da árvore de derivação, da esquerda para a direita."""
+    if node.is_leaf():
+        return [node.symbol]
+    collected = []
+    for child in node.children:
+        collected.extend(leaves(child))
+    return collected
+
+
+def test_derivation_tree():
+    """Árvore de derivação: caso normal, produção épsilon e caso de erro."""
+    # Caso normal: as folhas (esq->dir) reproduzem a entrada e a raiz e o inicial.
+    table = build_slr_table(load_grammar(grammar_path("expressao.txt")))
+    ok = parse(table, ["id", "*", "id", "+", "id"])
+    check("Arvore: entrada aceita tem arvore", ok.tree is not None)
+    check("Arvore: raiz e o simbolo inicial E", ok.tree.symbol == "E")
+    check("Arvore: folhas reproduzem a entrada na ordem",
+          leaves(ok.tree) == ["id", "*", "id", "+", "id"])
+    check("Arvore: render produz texto", bool(ok.tree.render().strip()))
+
+    # Caso épsilon: A -> & deve virar um no A com a folha '&' (S -> A C, A -> a A | &).
+    eps = build_slr_table(load_grammar(grammar_path("epsilon.txt")))
+    vazio = parse(eps, ["c"])
+    check("Arvore epsilon: entrada 'c' aceita", vazio.accepted and vazio.tree is not None)
+    check("Arvore epsilon: producao vazia gera folha '&'", "&" in leaves(vazio.tree))
+    check("Arvore epsilon: folhas sao ['&', 'c']", leaves(vazio.tree) == ["&", "c"])
+
+    nao_vazio = parse(eps, ["a", "a", "c"])
+    check("Arvore epsilon: 'a a c' aceita com arvore", nao_vazio.accepted and nao_vazio.tree is not None)
+    check("Arvore epsilon: folhas de 'a a c' terminam com a, &, c",
+          leaves(nao_vazio.tree) == ["a", "a", "&", "c"])
+
+    # Caso de erro: nao ha arvore e o erro e localizado.
+    erro = parse(eps, ["a", "a"])
+    check("Arvore erro: entrada rejeitada nao tem arvore", (not erro.accepted) and erro.tree is None)
+    check("Arvore erro: posicao do erro reportada", erro.error_position is not None)
+
+
 def main():
     """Roda todos os testes e informa o total de verificações aprovadas."""
     test_expression_grammar()
@@ -155,6 +194,7 @@ def main():
     test_calls_epsilon()
     test_blocks()
     test_non_slr()
+    test_derivation_tree()
     passed = 0
     for description, ok in RESULTS:
         passed += int(ok)
