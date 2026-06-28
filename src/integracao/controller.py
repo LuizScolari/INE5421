@@ -159,6 +159,8 @@ QPlainTextEdit, QListWidget, QTableView { border: 1px solid #cbd2d9; border-radi
                background: white; }
 QHeaderView::section { background: #334e68; color: white; padding: 4px; border: none; }
 QComboBox { background: white; border: 1px solid #9aa5b1; border-radius: 6px; padding: 4px 8px; }
+QLabel#aviso { background: #fff4f4; color: #8a1f1f; border: 1px solid #f0b4b4;
+               border-radius: 6px; padding: 8px 12px; }
 """
 
 
@@ -241,6 +243,22 @@ def _slr_rows(table):
         row += [str(table.goto.get((state, nt), "")) for nt in nonterminals]
         rows.append(row)
     return headers, rows
+
+
+def _slr_conflitos_texto(table):
+    """Texto de aviso quando a gramática não é SLR(1); '' quando não há conflitos.
+
+    Cada conflito guardado na tabela é `(estado, terminal, acao_existente, acao_nova)`;
+    as ações são formatadas como na tabela (sj, rj, acc) para facilitar a leitura.
+    """
+    if table.is_slr():
+        return ""
+    linhas = ["Gramatica NAO e SLR(1): ha conflito(s) na tabela ACTION."]
+    for state, terminal, antiga, nova in table.conflicts:
+        linhas.append(
+            f"  estado {state}, simbolo '{terminal}': "
+            f"{_fmt_action(antiga)} x {_fmt_action(nova)}")
+    return "\n".join(linhas)
 
 
 # --------------------------------------------------------------------------- #
@@ -327,11 +345,24 @@ class IntegracaoWindow(QtWidgets.QMainWindow):
         sub = QtWidgets.QTabWidget()
         self.txt_itens = _code_view()
         self.txt_ff = _code_view()
-        self.tbl_slr = _tabela()
         self.txt_resultado = _code_view()
+
+        # Aba da tabela SLR: um aviso de conflito (oculto quando a gramática é
+        # SLR(1)) acima da tabela ACTION/GOTO.
+        slr_widget = QtWidgets.QWidget()
+        slr_layout = QtWidgets.QVBoxLayout(slr_widget)
+        self.lbl_slr_conflitos = QtWidgets.QLabel()
+        self.lbl_slr_conflitos.setObjectName("aviso")
+        self.lbl_slr_conflitos.setWordWrap(True)
+        self.lbl_slr_conflitos.setFont(_mono_font())
+        self.lbl_slr_conflitos.setVisible(False)
+        self.tbl_slr = _tabela()
+        slr_layout.addWidget(self.lbl_slr_conflitos)
+        slr_layout.addWidget(self.tbl_slr)
+
         sub.addTab(self.txt_itens, "Itens LR(0)")
         sub.addTab(self.txt_ff, "FIRST / FOLLOW")
-        sub.addTab(self.tbl_slr, "Tabela SLR (ACTION/GOTO)")
+        sub.addTab(slr_widget, "Tabela SLR (ACTION/GOTO)")
         sub.addTab(self.txt_resultado, "Resultado & Arvore de derivacao")
         self.tabs.addTab(sub, "4. Sintatico (T2)")
 
@@ -394,6 +425,9 @@ class IntegracaoWindow(QtWidgets.QMainWindow):
         self.txt_ff.setPlainText(dados["first_follow"])
         self.tbl_slr.setModel(_model(*_slr_rows(dados["tabela"])))
         self.tbl_slr.resizeColumnsToContents()
+        conflitos = _slr_conflitos_texto(dados["tabela"])
+        self.lbl_slr_conflitos.setText(conflitos)
+        self.lbl_slr_conflitos.setVisible(bool(conflitos))
         self.txt_resultado.setPlainText(dados["resultado"])
         self.txt_simbolos.setPlainText(dados["simbolos"])
 
