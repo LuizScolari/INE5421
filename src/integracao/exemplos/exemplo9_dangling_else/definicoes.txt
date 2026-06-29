@@ -1,0 +1,4 @@
+kw: if | then | else
+id: [a-zA-Z]([a-zA-Z] | [0-9])*
+num: [0-9]+
+op: = | <

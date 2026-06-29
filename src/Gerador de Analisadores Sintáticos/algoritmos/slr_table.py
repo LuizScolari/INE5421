@@ -21,6 +21,16 @@ class SLRTable:
         return not self.conflicts
 
 
+def resolve_conflict(existing, incoming):
+    """resolve um conflito na tabela ACTION pelas regras-padrão do Aho (Seção 4.9)"""
+    kinds = {existing[0], incoming[0]}
+    if "shift" in kinds and "reduce" in kinds:
+        return existing if existing[0] == "shift" else incoming
+    if existing[0] == "reduce" and incoming[0] == "reduce":
+        return existing if existing[1] <= incoming[1] else incoming
+    return existing
+
+
 def build_slr_table(grammar):
     """constrói a tabela SLR para uma gramática, aumentando-a antes (Algoritmo 4.46)"""
     augmented = grammar.augmented()
@@ -36,6 +46,7 @@ def build_slr_table(grammar):
         existing = action.get((state, terminal))
         if existing is not None and existing != value:
             conflicts.append((state, terminal, existing, value))
+            action[(state, terminal)] = resolve_conflict(existing, value)
             return
         action[(state, terminal)] = value
 

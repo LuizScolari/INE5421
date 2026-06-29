@@ -1,0 +1,1 @@
+Dangling-else: gramatica NAO-SLR(1) com conflito shift-reduce no 'else' (estado 12: shift x reduce). A fonte e aceita pois o conflito e resolvido por shift, ligando o else ao if mais proximo.

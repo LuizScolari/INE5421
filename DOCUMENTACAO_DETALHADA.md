@@ -104,3 +104,9 @@ Conflitos (celula com duas acoes distintas) sao registrados em vez de
 silenciosamente sobrescritos. `SLRTable.is_slr()` retorna `True` se nao ha
 conflitos. O enunciado do T2 chama essa tabela de "Algoritmo 4.38"; e a mesma
 construcao, o numero muda entre edicoes.
+
+Detectado o conflito, `resolve_conflict(...)` escolhe a acao da celula pelas
+regras-padrao do Aho (Secao 4.9, p. 293): **shift/reduce -> shift** (resolve o
+*dangling-else*, Secao 4.8.2, p. 281-283) e **reduce/reduce -> producao de menor
+indice** (a listada primeiro). O conflito segue em `conflicts`, entao a gramatica
+continua reportada como nao-SLR(1).
