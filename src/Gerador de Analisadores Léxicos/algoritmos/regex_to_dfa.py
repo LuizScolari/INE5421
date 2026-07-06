@@ -250,25 +250,26 @@ def annotate(node, followpos):
 
 def regex_to_dfa(regex, token=None):
     """converte uma expressão regular em um AFD rotulado pelo token informado"""
+    # ex "ab*": to_tokens -> add_concatenation -> to_postfix -> "a b . *" (com o '.' entre a e b*)
     postfix = to_postfix(add_concatenation(to_tokens(regex)))
-    tree = desugar(build_tree(postfix))
+    tree = desugar(build_tree(postfix))  # arvore: .( a , *(b) )  -- ja sem '+'/'?' de sobra
 
-    # simbolo # adicionado
+    # simbolo # adicionado -- cria a folha extra e a raiz vira "(r)#": .( arvore_de_r , # )
     end_leaf = Node("symbol", symbol=ENDMARKER)
     root = Node(".", left=tree, right=end_leaf)
 
     symbol_at = {}
     counter = [0]
-    assign_positions(root, counter, symbol_at)
-    end_position = end_leaf.position
+    assign_positions(root, counter, symbol_at)   # ex "ab*": symbol_at = {1:'a', 2:'b', 3:'#'}
+    end_position = end_leaf.position              # ex: end_position = 3
 
     followpos = {position: set() for position in symbol_at} # monta followpos pra cada position do symbol_at
-    annotate(root, followpos)
+    annotate(root, followpos)  # preenche followpos ex "ab*": followpos = {1:{2,3}, 2:{2,3}}
 
-    # monta o alfabeto, mas exclui o #
+    # monta o alfabeto, mas exclui o # (ex "ab*": alphabet = {'a','b'}, sem o '#' da posicao 3)
     alphabet = {symbol_at[position] for position in symbol_at if position != end_position}
 
-    # inicial do afd é o firstpos da raiz
+    # inicial do afd é o firstpos da raiz (ex "ab*": root.firstpos = {1} -> start = frozenset({1}))
     start = frozenset(root.firstpos)
 
     states = {start} # estados ja conhecidos
@@ -282,6 +283,7 @@ def regex_to_dfa(regex, token=None):
             for position in current: # olha cada posição do estado atual
                 if symbol_at.get(position) == symbol:
                     destination |= followpos.get(position, set()) # se o symbol for igual ao symbol_at.get(position) então o destination sera o followpos de position
+            # ex: current={1}, symbol='a' -> pos 1 é 'a' -> destination = followpos[1] = {2,3} -> vira o estado {2,3}
             if destination:
                 destination = frozenset(destination)
                 transitions[(current, symbol)] = destination
@@ -292,8 +294,9 @@ def regex_to_dfa(regex, token=None):
     automaton = Automaton()
     automaton.set_initial(start)
     for state in states:
-        is_final = end_position in state
+        is_final = end_position in state   # ex: {2,3} contem a posicao 3 (o #) -> estado final
         automaton.add_state(state, accepting=is_final, token=token if is_final else None)
     for (source, symbol), target in transitions.items(): # source é origem. symbol é o simbolo lido, target é estado de destino
         automaton.add_transition(source, symbol, target)
     return automaton.rename("q")
+    # resultado final "ab*": q0={1} --a--> q1={2,3}(final) --b--> q1 (auto laco, pois followpos[2]={2,3} tambem)
