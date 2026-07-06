@@ -19,19 +19,23 @@ def minimize(dfa):
     group_of = {}
     for state in states:
         if state is not DEAD and state in dfa.accepting:
-            group_of[state] = ("final", dfa.token_of.get(state))
+            group_of[state] = ("final", dfa.token_of.get(state)) # estados finais com tokens diferentes não podem ser juntados
         else:
             group_of[state] = ("comum",)
 
     while True:
         buckets = {}
         for state in states:
+            # cria assinatura para o estado, contém o grupo atual dele e para quais grupos ele vai lendo cada simbolo
             signature = (group_of[state], tuple(group_of[_delta(dfa, state, a)] for a in symbols))
-            buckets.setdefault(signature, []).append(state)
+            buckets.setdefault(signature, []).append(state) # estados com a mesma assinatura ficam no mesmo balde
         new_group_of = {}
+        # transforma os baldes em numeros de grupos
+        # [q0 q1] --> new_group_of[q0] = 0
         for index, members in enumerate(buckets.values()):
             for state in members:
                 new_group_of[state] = index
+        # se a quantidade de grupos n mudou, acabou
         if len(set(new_group_of.values())) == len(set(group_of.values())):
             group_of = new_group_of
             break

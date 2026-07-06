@@ -5,12 +5,18 @@ class Automaton:
     """autômato finito com estados, alfabeto, transições e rótulos de token"""
 
     def __init__(self):
-        self.states = set()
-        self.alphabet = set()
-        self.transitions = {}
-        self.initial = None
-        self.accepting = set()
-        self.token_of = {}
+        self.states = set() # conjunto de estados
+        self.alphabet = set() # sibolos de entrada
+        # dicionario de dicionarios de conjuntos:
+    #   transitions = {
+            # "q0": {"i": {"q1"}},
+            # "q1": {"f": {"q2"}},
+            # "q2": {},
+        #}
+        self.transitions = {} # mapeia de um estado que, por um simbolo, leva pra um conjunto de destinos
+        self.initial = None # estado inicial
+        self.accepting = set() # estados finais
+        self.token_of = {} # mapeia estado final para o nome do token que ele reconhece
 
     def add_state(self, state, accepting=False, token=None):
         """inclui um estado, opcionalmente marcando-o como final e seu token"""
@@ -55,7 +61,7 @@ class Automaton:
         return True
 
     def rename(self, prefix="q"):
-        """devolve uma cópia com estados renomeados em ordem de alcance (BFS)"""
+        """devolve uma cópia com estados renomeados (q0, q1, q2...) em ordem de alcance (BFS)"""
         order = []
         seen = set()
         queue = [self.initial] if self.initial is not None else []
@@ -91,7 +97,7 @@ class Automaton:
         return renamed
 
     def to_table(self, title=None):
-        """monta uma representação textual do autômato em forma de tabela"""
+        """monta uma representação textual do autômato em forma de tabela. apenas para visualização"""
         symbols = sorted(self.alphabet)
         has_epsilon = any(EPSILON in by_symbol for by_symbol in self.transitions.values())
         columns = symbols + ([EPSILON] if has_epsilon else [])
